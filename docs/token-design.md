@@ -10,14 +10,14 @@ One Solana-based meme token for the POLITIK RIUH community. The token is a commu
 
 ## 2. Venue options (decision open — D-04)
 
-| Venue | Create cost (verified 2026-11-09) | Tradeable immediately | Creator economics | Control | Notes |
+| Venue | Create cost (unverified working estimate) | Tradeable immediately | Creator economics (unverified) | Control | Notes (unverified) |
 |---|---|---|---|---|---|
 | pump.fun | 0 SOL + network fee/rent (~0.02 SOL ballpark for first buy) | Yes — bonding curve, auto-migrates to PumpSwap at ~85 SOL buy volume | 0.30% of trades to creator | Low: supply 1B fixed, 6 decimals, name/symbol/image only | Fastest zero-capital path; ~1.4% lifetime graduation rate (May–Jun 2026 study) |
 | Own SPL mint | Rent only (~0.002 SOL mint + ~0.01 SOL metadata) | No — needs a liquidity pool, which needs capital | None automatic | Full: supply, decimals, metadata, authorities | "From scratch" but not tradeable without LP funding |
 
-Recommendation (Muse): **pump.fun for the first token** — it is the only route that yields a tradeable coin at ~zero capital. Own SPL mint remains an option for a second-phase token if LP funding appears.
+Preliminary Muse preference: **pump.fun** for the first token, but this is not an owner decision. It must not be treated as a recommendation until the fee, creator-economics, migration, and graduation claims above are verified from primary sources and compared against the project's budget and risk constraints.
 
-Sources: pump.fun fee page (checked Oct 2026 via public guides); four.meme ~0.005 BNB for the BSC comparison (not used — chain is Solana).
+**Source-quality warning:** the fee page and study references were not recorded as direct URLs or archived evidence in this repository. The numerical estimates and graduation-rate claim above are **unverified working notes**, not current verified facts. Do not rely on them for a venue decision or publish them until Muse attaches dated primary-source URLs/evidence and ChatGPT reviews the calculation. The four.meme BSC comparison is out of scope for Solana.
 
 ## 3. Concept / name (founder decision recorded — 2026-11-09)
 
