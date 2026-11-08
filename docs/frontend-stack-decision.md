@@ -54,3 +54,7 @@
 ## 7. Open decisions carried (do not finalize in code)
 
 D-05 token name/ticker; D-05a supply (1B vs 10B); D-04 launch venue/mechanism; launch date; official domain + verified social links; hosting/deployment ownership (D-01).
+
+## Owner-approved scope amendment (2026-11-09)
+
+The token-site brand is now **POLITIK RIUH presents REFORMASI**. The static frontend decision remains appropriate for the informational six-page site, but it is **not** an architecture for collecting applicant data. The approved task-based whitelist requires a protected backend, database, applicant authentication, admin authentication/MFA, email verification, privacy/retention controls, and server-side task verification. See `docs/whitelist-spec.md`. No live registration or provider selection is authorized until Rama approves the architecture and privacy decisions.
