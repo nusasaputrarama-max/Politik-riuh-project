@@ -47,6 +47,8 @@ Muse's `apps/token-site/README.md` records the following local results:
 
 These are **reported local results**, not CI results. This audit verified that the evidence files and README exist, but did not rerun Muse's local browser/curl test suite. The repo has zero GitHub Actions runs, so no independent CI confirmation exists.
 
+This audit also ran an independent static source scan against the six current HTML files, CSS, and JavaScript from GitHub: all six pages have one H1, skip link, header/nav/main/footer landmarks, no duplicate IDs, and no unresolved local links. All six still declare `lang="en"`. The inspected tree contains no form, `fetch()` call, XMLHttpRequest, localStorage use, or wallet signing/send-transaction method. This is a source scan only; it does not replace browser, server, or deployed HTTPS testing.
+
 ## Findings requiring correction
 
 ### F-01 — Root README is stale (high)
