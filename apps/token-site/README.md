@@ -1,74 +1,92 @@
-# POLITIK RIUH — Token Launch Website (Phase 1)
+# POLITIK RIUH — Situs Peluncuran Token (Fase 1)
 
-Pure static HTML/CSS/JS. **Zero dependencies**: no package manager, no build step, no webfonts, no external requests at runtime. System font stacks only.
+HTML/CSS/JS statis murni. **Tanpa dependensi**: tanpa package manager, tanpa build step, tanpa webfont, tanpa permintaan eksternal saat runtime. Hanya system font stack.
 
-## Files
+**Identitas:** POLITIK RIUH mempersembahkan **REFORMASI** — nama token REFORMASI sudah disetujui founder (issue #1, 2026-11-09); simbol yang diusulkan REFORMASI menunggu pemeriksaan kompatibilitas teknis. Seluruh salinan peserta berbahasa Indonesia (`lang="id"`).
 
-| File | What it is |
+## File
+
+| File | Isinya |
 |---|---|
-| `index.html` | `/` — landing: identity, status, token at a glance, pillars, transparency preview, risk disclosure |
-| `about.html` | Purpose, independent positioning, risks and limitations |
-| `token.html` | Token overview and facts table |
-| `launch.html` | Launch status ("Not launched") and the five mainnet gates |
-| `transparency.html` | Allocation / treasury / wallet disclosures (all currently unavailable) |
-| `roadmap.html` | Milestones with status labels backed by repository evidence |
-| `styles.css` | Shared design system (see below) |
-| `main.js` | One behaviour only: the mobile navigation toggle (progressive enhancement) |
-| `evidence/` | Screenshots from the checks below |
+| `index.html` | `/` — landing: identitas, status, token sekilas, pilar, pratinjau transparansi, pengungkapan risiko |
+| `about.html` | Tujuan, posisi independen, risiko dan batasan |
+| `token.html` | Gambaran token dan tabel fakta |
+| `launch.html` | Status peluncuran ("Belum diluncurkan"), lima gate mainnet, dan penjelasan whitelist |
+| `transparency.html` | Pengungkapan alokasi / treasury / dompet (semuanya belum tersedia) |
+| `roadmap.html` | Milestone dengan label status yang didukung bukti repositori |
+| `styles.css` | Sistem desain bersama (lihat di bawah) |
+| `main.js` | Satu perilaku saja: toggle navigasi mobile (progressive enhancement) |
+| `checks.sh` | Checks lokal yang dapat direproduksi (rute, HTML, salinan, JS, kontras) |
+| `screenshots.sh` | Refresh screenshot dengan headless Chrome |
+| `nav-toggle-test.py` | Uji fungsional toggle navigasi via Chrome DevTools Protocol (stdlib saja) |
+| `evidence/` | Screenshot dari checks di bawah |
 
-## Design system
+## Sistem desain
 
-Near-black base `#0A0A0B`, surface `#121214`, thin borders `#26262A`, restrained red accent `#E5484D` (primary buttons use darker `#C93338` so white text passes WCAG AA), muted grey text `#9A9AA0`, monospace micro-labels, strong editorial headline, restrained ambient glow. Semantic HTML, keyboard navigation, visible focus, `prefers-reduced-motion` support. Responsive-first; mobile is a primary layout.
+Basis nyaris-hitam `#0A0A0B`, permukaan `#121214`, border tipis `#26262A`, aksen merah secukupnya `#E5484D` (tombol utama memakai `#C93338` yang lebih gelap agar teks putih lolos WCAG AA), teks abu-abu redup `#9A9AA0`, micro-label monospace, headline editorial yang kuat, glow ambient secukupnya. HTML semantik, navigasi keyboard, fokus yang terlihat, dukungan `prefers-reduced-motion`. Responsive-first; mobile adalah layout utama.
 
-## Local setup
+## Setup lokal
 
 ```sh
 cd apps/token-site
 python3 -m http.server 8000 --bind 127.0.0.1
-# open http://127.0.0.1:8000/index.html
+# buka http://127.0.0.1:8000/index.html
 ```
 
-No build, no install, no environment variables.
+Tanpa build, tanpa install, tanpa environment variable.
 
-## Checks run (2026-11-09, local)
+## Checks yang dijalankan (2026-11-09, lokal, PR-013)
 
-| Check | Result |
+Perintah yang dapat direproduksi:
+
+```sh
+cd apps/token-site
+bash checks.sh            # exit 0 = semua checks lolos
+bash screenshots.sh       # exit 0 = semua screenshot ter-refresh
+python3 nav-toggle-test.py  # exit 0 = toggle navigasi berfungsi
+```
+
+| Check | Hasil |
 |---|---|
-| Route smoke test (`curl`, local server) | **8/8 HTTP 200**: `/`, `index/about/token/launch/transparency/roadmap.html`, `styles.css`, `main.js` |
-| HTML parse (python `html.parser`) | **6/6 pages, no errors**; exactly one `<h1>` per page; `header/nav/main/footer` landmarks on every page; no duplicate IDs |
-| Internal links | All `href`/`src` targets resolve on disk (checked per page) |
-| JS syntax | `node --check main.js` — pass |
-| Contrast (computed WCAG ratios) | Muted text on bg **7.07:1**; headline **18.96:1**; red accent on bg **5.06:1**; primary button white on `#C93338` **5.01:1**; hover **5.55:1** — all pass AA normal text (4.5:1) |
-| Keyboard / accessibility checklist | Skip link on all 6 pages; `:focus-visible` outline; `aria-current="page"` on the current nav item (5 subpages); nav toggle carries `aria-expanded` and updates on click; logical tab order (DOM order) |
-| Nav toggle functional test | Temporary test page clicked the toggle in headless Chrome: `NAV-OPEN=true ARIA=true LABEL=Close menu` — pass (test file removed afterwards) |
-| Secrets grep | No private keys, API keys, tokens, or passwords found in the tree |
-| External requests | None at runtime. The only external URL in the tree is the GitHub repository link (footer + transparency page) |
-| Wallet / signing code | None. The only wallet text is the header status line "Wallet — Not connected · Read-only connect planned" (plain text, no button, no code) |
-| Screenshots (headless Chrome 157) | `evidence/landing-desktop.png` (1280×2600 full page), `evidence/landing-mobile.png` (390×3800 full page), `evidence/{about,token,launch,transparency,roadmap}-desktop.png` (1280×1000 viewport) |
+| Route smoke test (`curl`, server lokal) | **8/8 HTTP 200**: `index/about/token/launch/transparency/roadmap.html`, `styles.css`, `main.js` |
+| HTML parse (python `html.parser`) | **6/6 halaman, tanpa error**; `lang="id"`; tepat satu `<h1>` per halaman; landmark `header/nav/main/footer` di setiap halaman; tanpa ID duplikat |
+| Tautan internal | Semua target `href`/`src` resolve di disk (diperiksa per halaman) |
+| Disiplin salinan | Tanpa nama kandidat lama (NENGOK/GORENG/DER); tanpa sisa salinan Inggris yang menghadap peserta; identitas REFORMASI ada; status "Belum diluncurkan" ada; `launch.html` menyatakan whitelist belum dibuka |
+| Form / fetch / storage / dompet | **Tidak ada**: tanpa `<form>`, `fetch()`/XHR, `localStorage`, kode wallet/signing, atau pola secret di source situs |
+| Sintaks JS | `node --check main.js` — lolos |
+| Kontras (rasio WCAG yang dihitung) | Teks redup di bg **7,07:1**; headline **18,96:1**; aksen merah di bg **5,06:1**; tombol utama putih di `#C93338` **5,23:1**; hover **5,79:1** — semuanya lolos AA untuk teks normal (4,5:1) |
+| Uji fungsional nav toggle (headless Chrome via CDP, lebar 390px) | `NAV-OPEN=true ARIA=true LABEL=Tutup menu` — lolos |
+| Screenshot (headless Chrome 157) | `evidence/landing-desktop.png` (1280×2600 full page), `evidence/landing-mobile.png` (390×3800 full page), `evidence/{about,token,launch,transparency,roadmap}-desktop.png` (1280×1000 viewport) — dicek visual: landing desktop + mobile, token, launch, roadmap tampil benar |
 
-### Bugs found by the screenshots and fixed
+### Koreksi dari screenshot dan checks PR-013
 
-1. **Hero pushed down ~480px (desktop + mobile).** Cause: `.hero > * { position: relative; }` outranked `.glow`'s `position: absolute`, so the glow took flow space. Fixed to `.hero > .wrap`.
-2. **Wallet status pill overflowed the viewport on mobile.** Cause: `white-space: nowrap` on a 44-character pill. Fixed: wraps to two lines below 720px.
-3. **Primary button contrast failed AA (3.75:1).** White on `#E5484D` is below 4.5:1 for normal text. Fixed: button background darkened to `#C93338` (5.01:1); hover `#BE2E33` (5.55:1).
+1. **Angka kontras tombol utama di README Fase 1 salah hitung.** Nilai yang tercatat (5,01:1 dan 5,55:1) tidak cocok dengan perhitungan ulang dari palet CSS; nilai yang benar adalah **5,23:1** dan **5,79:1** (keduanya tetap lolos AA). Tabel di atas memakai nilai yang sudah dikoreksi; `checks.sh` menghitung ulang rasio ini setiap kali dijalankan.
+2. **Pola pemindai secret `sk-` sempat false positive** pada `risk-heading` (mengandung substring `sk-`). Pola diperketat menjadi `sk-` + 20+ karakter alfanumerik di `checks.sh`.
 
-## Facts discipline (binding)
+### Bug yang ditemukan screenshot dan diperbaiki (Fase 1)
 
-- **Supply is shown as "Proposed — pending founder approval" with NO number.** Two conflicting proposals exist: `docs/token-design.md` drafts 1,000,000,000 while `docs/website-launch-spec.md` §10 notes 10,000,000,000 as a proposal. That conflict (D-05a) is an open founder decision; the site does not resolve it.
-- The owner has approved token name **REFORMASI** and proposed ticker **REFORMASI**, pending technical compatibility checks. No contract/mint address, launch date, holder count, volume, price, or reward metrics exist.
-- Launch status is "Not launched" / "Mainnet not launched", with no countdown.
-- No fake counters, waitlists, dead CTAs, or placeholder links presented as functional.
+1. **Hero terdorong ke bawah ~480px (desktop + mobile).** Penyebab: `.hero > * { position: relative; }` mengalahkan `position: absolute` milik `.glow`, sehingga glow memakan ruang flow. Diperbaiki menjadi `.hero > .wrap`.
+2. **Pill status dompet meluber dari viewport di mobile.** Penyebab: `white-space: nowrap` pada pill 44 karakter. Diperbaiki: membungkus ke dua baris di bawah 720px.
+3. **Kontras tombol utama gagal AA (3,75:1).** Putih di `#E5484D` di bawah 4,5:1 untuk teks normal. Diperbaiki: latar tombol digelapkan ke `#C93338` (5,23:1); hover `#BE2E33` (5,79:1).
 
-## Deployment target (proposed, not configured)
+## Disiplin fakta (mengikat)
 
-**GitHub Pages (proposed)** — decision D-01 is still open (ChatGPT/Rama). Note: the site lives in a subdirectory (`apps/token-site/`), so Pages needs a workflow that publishes that directory (or a dedicated branch). Nothing is deployed yet; this README documents the target only.
+- **Suplai ditampilkan sebagai "Diusulkan — menunggu persetujuan founder" TANPA angka.** Dua usulan yang bertentangan masih ada: `docs/token-design.md` merancang 1.000.000.000 sementara `docs/website-launch-spec.md` §10 mencatat 10.000.000.000 sebagai usulan. Konflik itu (D-05a) adalah keputusan founder yang masih terbuka; situs tidak menyelesaikannya.
+- **Nama token REFORMASI sudah disetujui founder; simbol yang diusulkan REFORMASI** menunggu pemeriksaan kompatibilitas teknis — situs tidak menyatakan simbol itu kompatibel. Tidak ada alamat kontrak/mint, tanggal peluncuran, jumlah holder, volume, harga, atau metrik reward di mana pun di situs — semuanya belum ada.
+- Status peluncuran adalah "Belum diluncurkan" / "Mainnet belum diluncurkan", tanpa hitung mundur. Gate mainnet 01 (konsep disetujui) ditandai Selesai karena nama REFORMASI disetujui; gate 02–05 masih Menunggu.
+- **Whitelist adalah alur pendaftaran dan peninjauan GRATIS, bukan penjualan whitelist atau alokasi yang dijamin — dan pendaftaran belum dibuka.** Belum ada backend, basis data, atau deployment yang disetujui; situs statis ini tidak mengumpulkan data pendaftar.
+- Tanpa counter palsu, waitlist, CTA mati, atau tautan placeholder yang disajikan sebagai fungsional.
 
-## Known limitations
+## Target deployment (diusulkan, belum dikonfigurasi)
 
-- **No wallet connection.** Deferred per `docs/frontend-stack-decision.md` §2 (optional in the spec; adding wallet-adapter packages would introduce dependencies for an optional feature). The header shows the status as text only.
-- **No backend, no forms, no analytics.** Contact / report channel is not yet configured (stated as plain text in the footer).
-- **Token facts still pending:** ticker compatibility check, supply (1B vs 10B conflict), decimals, allocation, venue, launch date, official domain and verified social links. The site copy still needs the PR-013 Indonesian/REFORMASI alignment pass.
-- **Whitelist is not implemented.** The current site has no form, backend, database, applicant dashboard, or admin panel. Do not collect real applicant data until the architecture in `docs/whitelist-spec.md` is approved.
-- **Reduced-motion support is verified by code inspection** (the `prefers-reduced-motion` media query is present and disables transitions); it was not tested against a live OS-level reduced-motion setting.
-- **Screenshots are local renders** (headless Chrome 157 against a local server), not a deployed-site capture.
-- The founder's Elysium mobile screenshot was **not** in the repo and was not used; the design works from the written description of the references only, and does not clone either reference.
+**GitHub Pages (diusulkan)** — keputusan D-01 masih terbuka (ChatGPT/Rama). Catatan feasibility lengkap ada di `docs/DEPLOYMENT_FEASIBILITY_TOKEN_SITE_2026-11-09.md`: artifact source harus tepat `apps/token-site/` (bukan root repo), opsi workflow GitHub Actions vs branch, domain kustom, HTTPS, implikasi env/keamanan, dan rollback. Situs berada di subdirektori (`apps/token-site/`), jadi Pages membutuhkan workflow yang memublikasikan direktori itu (atau branch khusus). **Belum ada yang di-deploy; tidak ada setting repo yang diubah.**
+
+## Keterbatasan yang diketahui
+
+- **Tanpa koneksi dompet.** Ditunda sesuai `docs/frontend-stack-decision.md` §2 (opsional di spec; menambah package wallet-adapter akan memperkenalkan dependensi untuk fitur opsional). Header hanya menampilkan status sebagai teks.
+- **Tanpa backend, tanpa form, tanpa analitik.** Kanal kontak / pelaporan belum dikonfigurasi (dinyatakan sebagai teks biasa di footer).
+- **Fakta token yang masih menunggu keputusan founder:** pemeriksaan kompatibilitas simbol, suplai (konflik 1B vs 10B), desimal, alokasi, venue (D-04), tanggal peluncuran, domain resmi, dan tautan sosial terverifikasi.
+- **Whitelist belum diimplementasikan.** Situs saat ini tanpa form, backend, basis data, dasbor applicant, atau panel admin. Jangan kumpulkan data applicant nyata sampai arsitektur di `docs/whitelist-spec.md` disetujui.
+- **Dukungan reduced-motion diverifikasi lewat inspeksi kode** (media query `prefers-reduced-motion` ada dan menonaktifkan transisi); belum diuji terhadap pengaturan reduced-motion di level OS yang live.
+- **Screenshot adalah render lokal** (headless Chrome 157 terhadap server lokal), bukan tangkapan situs yang sudah di-deploy.
+- Screenshot mobile founder dari Elysium **tidak ada** di repo dan tidak dipakai; desain bekerja dari deskripsi tertulis atas referensi saja, dan tidak mengkloning referensi mana pun.

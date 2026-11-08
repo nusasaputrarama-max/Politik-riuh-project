@@ -12,6 +12,6 @@
   toggle.addEventListener("click", function () {
     var open = nav.classList.toggle("is-open");
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
-    toggle.textContent = open ? "Close menu" : "Menu";
+    toggle.textContent = open ? "Tutup menu" : "Menu";
   });
 })();
