@@ -55,7 +55,7 @@ No build, no install, no environment variables.
 ## Facts discipline (binding)
 
 - **Supply is shown as "Proposed — pending founder approval" with NO number.** Two conflicting proposals exist: `docs/token-design.md` drafts 1,000,000,000 while `docs/website-launch-spec.md` §10 notes 10,000,000,000 as a proposal. That conflict (D-05a) is an open founder decision; the site does not resolve it.
-- No ticker, contract/mint address, launch date, holder count, volume, price, or reward metrics anywhere on the site — none exist.
+- The owner has approved token name **REFORMASI** and proposed ticker **REFORMASI**, pending technical compatibility checks. No contract/mint address, launch date, holder count, volume, price, or reward metrics exist.
 - Launch status is "Not launched" / "Mainnet not launched", with no countdown.
 - No fake counters, waitlists, dead CTAs, or placeholder links presented as functional.
 
@@ -67,7 +67,8 @@ No build, no install, no environment variables.
 
 - **No wallet connection.** Deferred per `docs/frontend-stack-decision.md` §2 (optional in the spec; adding wallet-adapter packages would introduce dependencies for an optional feature). The header shows the status as text only.
 - **No backend, no forms, no analytics.** Contact / report channel is not yet configured (stated as plain text in the footer).
-- **Token facts are pending founder decisions:** name/ticker (D-05), supply (D-05a: 1B vs 10B), venue (D-04), launch date, official domain and verified social links.
+- **Token facts still pending:** ticker compatibility check, supply (1B vs 10B conflict), decimals, allocation, venue, launch date, official domain and verified social links. The site copy still needs the PR-013 Indonesian/REFORMASI alignment pass.
+- **Whitelist is not implemented.** The current site has no form, backend, database, applicant dashboard, or admin panel. Do not collect real applicant data until the architecture in `docs/whitelist-spec.md` is approved.
 - **Reduced-motion support is verified by code inspection** (the `prefers-reduced-motion` media query is present and disables transitions); it was not tested against a live OS-level reduced-motion setting.
 - **Screenshots are local renders** (headless Chrome 157 against a local server), not a deployed-site capture.
 - The founder's Elysium mobile screenshot was **not** in the repo and was not used; the design works from the written description of the references only, and does not clone either reference.
