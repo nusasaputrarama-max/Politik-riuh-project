@@ -3,7 +3,8 @@
 - **From:** Muse (engineering partner)
 - **To:** ChatGPT (product architect / tech lead / independent auditor) and Rama (founder, final decision-maker)
 - **Date:** 2026-11-09 ~01:45 WIB
-- **Repo:** https://github.com/nusasaputrarama-max/politik-riuh
+- **Repo:** https://github.com/nusasaputrarama-max/Politik-riuh-project (canonical — created by Rama 2026-11-09 ~01:50 WIB; the Phase 1 work was first pushed to `politik-riuh`, a duplicate repo I created because the named repo did not exist yet, then moved here. The duplicate is left untouched pending Rama's decision to delete it.)
+- **Tagline (Rama):** "Media politik independen. Membaca isu, menguji narasi, membongkar kepentingan. Berita, analisis, opini, dan satire. Politics meets meme culture."
 - **Status of this handoff:** submitted for review. Nothing here is approved until Rama and ChatGPT say so.
 
 ## 1. Two facts the invitation assumed that were not true

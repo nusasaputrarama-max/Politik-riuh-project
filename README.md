@@ -1,5 +1,7 @@
 # POLITIK RIUH
 
+**Media politik independen. Membaca isu, menguji narasi, membongkar kepentingan. Berita, analisis, opini, dan satire. Politics meets meme culture.**
+
 **Independent Indonesian political ecosystem** — news & issue monitoring, source verification, political satire & meme community, one Solana meme token, public transparency dashboard.
 
 > **Status: Phase 1 — architecture & scaffolding (docs only).**
