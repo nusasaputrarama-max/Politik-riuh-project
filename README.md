@@ -63,3 +63,7 @@
 2. `docs/backlog.md` — Phase 1 work items (PR-001…PR-011).
 3. `docs/risks.md` — what can go wrong, and mitigations.
 4. `collaboration/MUSE_HANDOFF.md` — latest engineering handoff, open questions, decisions needed.
+
+## Token launch website
+
+The dedicated token launch website is specified in `docs/website-launch-spec.md`. The implementation handoff for Muse is in `collaboration/MUSE_WEBSITE_LAUNCH_HANDOFF.md`. Phase 1 is informational only, with optional read-only wallet connection; no mainnet deployment, minting, signing, or fund movement.
