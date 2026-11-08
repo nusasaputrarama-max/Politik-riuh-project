@@ -86,7 +86,7 @@ No invasive tracking by default. If analytics are proposed, document provider, e
 
 ## 10. Explicit decisions still required
 Do not silently finalize these:
-- Token name and ticker.
+- ~~Token name and ticker.~~ — **DECIDED 2026-11-09 (issue #1, owner comments):** token name REFORMASI; proposed symbol/ticker REFORMASI, subject to technical compatibility checks before publication. (PR-013.)
 - Final supply, decimals, allocations, vesting, treasury and liquidity policy.
 - Launch date, launch venue and launch mechanism.
 - Official domain and verified social links.
