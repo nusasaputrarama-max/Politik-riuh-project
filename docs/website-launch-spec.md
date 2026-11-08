@@ -1,4 +1,7 @@
 # POLITIK RIUH — Token Launch Website Specification
+
+> **Owner decisions added after v0.1 (GitHub issue #1):** the project presents REFORMASI; token name is REFORMASI and proposed symbol/ticker is REFORMASI pending technical compatibility checks. The approved whitelist requirements and sequential task flow are specified in `docs/whitelist-spec.md`. These decisions supersede the open name/ticker assumptions in this initial draft. Supply remains unresolved; do not publish a number.
+
 Version: 0.1
 Date: 2026-11-09
 Status: Approved direction for Phase 1 implementation planning; not production-ready.
