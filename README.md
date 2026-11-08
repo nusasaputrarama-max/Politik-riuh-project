@@ -4,9 +4,9 @@
 
 **Independent Indonesian political ecosystem** — news & issue monitoring, source verification, political satire & meme community, one Solana meme token, public transparency dashboard.
 
-> **Status: Phase 1 — architecture & scaffolding (docs only).**
-> No application code runs anywhere yet. No mainnet deployment. No real token created.
-> See `docs/architecture.md` and `collaboration/MUSE_HANDOFF.md`.
+> **Status: Phase 1 — static token launch website implemented as a local prototype; whitelist and deployment are not implemented.**
+> The six-page site is in `apps/token-site/`. It is not publicly deployed. No whitelist backend, no mainnet deployment, and no real token created.
+> See `apps/token-site/README.md`, `docs/website-audit-2026-11-09.md`, and `docs/whitelist-spec.md`.
 
 ## Vision
 
@@ -39,7 +39,8 @@
 .
 ├── README.md
 ├── apps/
-│   └── web/            # Public site: home, news monitor, dashboard, meme gallery, token page
+│   ├── token-site/     # Static token launch prototype: landing + About/Token/Launch/Transparency/Roadmap
+│   └── web/            # Separate future political-news portal (scaffold only)
 ├── services/
 │   ├── ingestor/       # News/RSS monitoring → SQLite (no auto-publish)
 │   └── verifier/       # Verification workflow support (states, provenance, decision log)
@@ -52,6 +53,9 @@
 │   ├── backlog.md          # Phase 1 development backlog
 │   ├── risks.md            # Security, editorial, technical risks
 │   ├── token-design.md     # Token design (devnet only)
+│   ├── website-launch-spec.md # Token-site product specification
+│   ├── whitelist-spec.md   # REFORMASI whitelist requirements and security criteria
+│   ├── website-audit-2026-11-09.md # Current audit and next work order
 │   └── editorial-policy.md # Editorial policy draft v0.1
 └── collaboration/
     └── MUSE_HANDOFF.md     # Engineering handoff → ChatGPT / Rama review
@@ -59,11 +63,13 @@
 
 ## Docs to read first
 
-1. `docs/architecture.md` — what we are building and how.
-2. `docs/backlog.md` — Phase 1 work items (PR-001…PR-011).
-3. `docs/risks.md` — what can go wrong, and mitigations.
-4. `collaboration/MUSE_HANDOFF.md` — latest engineering handoff, open questions, decisions needed.
+1. `docs/architecture.md` — ecosystem architecture.
+2. `docs/backlog.md` — implementation work items and status.
+3. `docs/website-audit-2026-11-09.md` — latest verified token-site audit and next work order.
+4. `docs/whitelist-spec.md` — owner-approved REFORMASI whitelist requirements.
+5. `docs/risks.md` — security, editorial, and technical risks.
+6. `collaboration/MUSE_HANDOFF.md` and `collaboration/MUSE_WHITELIST_HANDOFF.md` — engineering handoffs.
 
 ## Token launch website
 
-The dedicated token launch website is specified in `docs/website-launch-spec.md`. The implementation handoff for Muse is in `collaboration/MUSE_WEBSITE_LAUNCH_HANDOFF.md`. Phase 1 is informational only, with optional read-only wallet connection; no mainnet deployment, minting, signing, or fund movement.
+The dedicated token launch prototype is in `apps/token-site/`. It is a static informational site only; there is no whitelist backend or live registration. REFORMASI whitelist requirements are in `docs/whitelist-spec.md`. No mainnet deployment, minting, wallet signing, or fund movement is authorized.
