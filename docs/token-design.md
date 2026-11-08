@@ -19,21 +19,18 @@ Recommendation (Muse): **pump.fun for the first token** — it is the only route
 
 Sources: pump.fun fee page (checked Oct 2026 via public guides); four.meme ~0.005 BNB for the BSC comparison (not used — chain is Solana).
 
-## 3. Concept / name (decision open — D-05, Rama final)
+## 3. Concept / name (founder decision recorded — 2026-11-09)
 
-Candidates carried over from the standalone meme-coin thread (2026-11-09):
-
-| Candidate | Ticker | Lore |
-|---|---|---|
-| NENGOK | $NENGOK | "Nengok dulu, baru beli." — the peek-first mascot, from Rama's nickname. |
-| GORENG | $GORENG | "Koin gorengan" — self-aware Indonesian shitcoin joke. |
-| DER | $DER | Rama's signature address word. |
-
-A project-native name (tied to POLITIK RIUH / "riuh" = noisy/rowdy) is also possible — e.g. a name playing on "riuh" (the noise of politics). Rama decides; no name is reserved or checked for collisions yet (uniqueness check is part of PR-009).
+- Token name: **REFORMASI** (approved by Rama in GitHub issue #1).
+- Proposed symbol/ticker: **REFORMASI**, subject to technical compatibility checks before publication.
+- Brand relationship: **POLITIK RIUH presents REFORMASI**. The token website is not the separate POLITIK RIUH news portal.
+- Character: hybrid Indonesian political satire, internet/meme culture, and community identity; long-term priority is community-first.
+- Team identity: anonymous. Compensate with operational transparency and verifiable disclosures; do not invent biographies, audits, partnerships, or safety claims.
+- The name decision does not finalize supply, decimals, allocations, vesting, venue, or launch date. Those remain separate open decisions.
 
 ## 4. Supply & distribution (draft — to be fixed in PR-009)
 
-- Supply: 1,000,000,000 (1B) if pump.fun (fixed by venue); if own SPL mint, 1B proposed for consistency.
+- Supply: **UNDECIDED**. Earlier drafts contain both 1,000,000,000 (1B) and 10,000,000,000 (10B) proposals. Neither is approved. Do not display a numeric supply or implement final tokenomics until Rama resolves the conflict.
 - No presale. No team allocation at launch on pump.fun (venue gives the creator no allocation except voluntary first buys).
 - Creator first buy: optional, small, disclosed on the dashboard if it happens.
 - No mint authority retained after launch (venue-controlled on pump.fun; explicit revoke step if own SPL mint).
