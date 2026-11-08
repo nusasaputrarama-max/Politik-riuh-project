@@ -1,7 +1,7 @@
 # POLITIK RIUH — Phase 1 Development Backlog
 
 - **Date:** 2026-11-09
-- **Status:** Active. PR-001 and PR-012 are complete; PR-013 is in progress; PR-014 has an approved specification and is awaiting architecture/provider decisions.
+- **Status:** Active. PR-001, PR-012 and PR-013 are complete; PR-014 ADR submitted as PR #5, awaiting ChatGPT review and founder provider decisions.
 - **Owners (proposed):** Rama = final decisions; ChatGPT = architecture/audit; Muse = implementation/docs.
 - **Rule:** no item is "done" without evidence in this repo (commit + file, test log where applicable). No fabricated results.
 
@@ -19,8 +19,8 @@
 | PR-010 | Security review by ChatGPT (ingestor SSRF guard, auth model, secrets policy) | ChatGPT | TODO | Written review in repo; findings tracked as issues/items, not just comments | PR-004 |
 | PR-011 | Threat model: impersonation (fake token, fake accounts, fake news sites) | Muse + ChatGPT | TODO | `docs/risks.md` § impersonation completed with detection + response plan | PR-009 |
 | PR-012 | Token launch website Phase 1 (static site: landing + About/Token/Launch/Transparency/Roadmap) | Muse | **DONE** (2026-11-09 ~02:35 WIB) | `apps/token-site/` 16 files, 6 routes, zero-dep static per `docs/frontend-stack-decision.md`; checks: routes 8/8 HTTP 200, HTML 6/6, contrast AA pass, screenshots in `apps/token-site/evidence/`; commits `15b3b6f`, `91cdf4a`, `63757c9`; facts discipline kept (supply shown proposed with NO number — D-05a still open) | Website handoff (ChatGPT 02:16 WIB) |
-| PR-013 | Review and prepare token-site for public preview | Muse + ChatGPT | **IN PROGRESS** | Natural Indonesian copy across all six routes; REFORMASI identity aligned; no unapproved token facts; deployment feasibility + rollback note; reproducible checks and refreshed desktop/mobile evidence; feature branch + PR; no deployment | PR-012, owner decisions in issue #1 |
-| PR-014 | REFORMASI whitelist architecture and secure participation flow | Muse (design) + ChatGPT (security review) | **SPEC READY — ARCHITECTURE DECISIONS PENDING** | Architecture options, data-flow, cost/privacy/security trade-offs, verification capability matrix, retention/deletion, admin MFA/RBAC, rollback; no real applicant data or live registration before Rama approval | `docs/whitelist-spec.md`, Rama decisions |
+| PR-013 | Review and prepare token-site for public preview | Muse + ChatGPT | **DONE** (2026-11-09, PR #4) | Natural Indonesian copy across all six routes; REFORMASI identity aligned; F-08 venue economics verified from primary source; deployment feasibility + rollback note; reproducible checks (bash checks.sh exit 0) and refreshed desktop/mobile evidence; commits `11ff723`, `aaa66ea`; no deployment | PR-012, owner decisions in issue #1 |
+| PR-014 | REFORMASI whitelist architecture and secure participation flow | Muse (design) + ChatGPT (security review) | **ADR SUBMITTED (PR #5, 2026-11-09) — AWAITING REVIEW + FOUNDER DECISIONS** | `docs/whitelist-architecture.md`: 3 options compared (Supabase/VPS/Workers+D1), data-flow, threat model, cost, verification matrix, enforcement spec; recommendation Supabase Pro; no real applicant data or live registration before Rama approval | `docs/whitelist-spec.md`, Rama decisions |
 
 ## Notes
 
