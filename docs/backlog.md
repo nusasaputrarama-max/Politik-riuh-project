@@ -18,6 +18,7 @@
 | PR-009 | Token design v1 (concept, supply, distribution, devnet plan) | Muse | TODO | `docs/token-design.md` completed with concept decided by Rama; devnet steps listed; mainnet gates stated | D-04, D-05 |
 | PR-010 | Security review by ChatGPT (ingestor SSRF guard, auth model, secrets policy) | ChatGPT | TODO | Written review in repo; findings tracked as issues/items, not just comments | PR-004 |
 | PR-011 | Threat model: impersonation (fake token, fake accounts, fake news sites) | Muse + ChatGPT | TODO | `docs/risks.md` § impersonation completed with detection + response plan | PR-009 |
+| PR-012 | Token launch website Phase 1 (static site: landing + About/Token/Launch/Transparency/Roadmap) | Muse | **DONE** (2026-11-09 ~02:35 WIB) | `apps/token-site/` 16 files, 6 routes, zero-dep static per `docs/frontend-stack-decision.md`; checks: routes 8/8 HTTP 200, HTML 6/6, contrast AA pass, screenshots in `apps/token-site/evidence/`; commits `15b3b6f`, `91cdf4a`, `63757c9`; facts discipline kept (supply shown proposed with NO number — D-05a still open) | Website handoff (ChatGPT 02:16 WIB) |
 
 ## Notes
 
