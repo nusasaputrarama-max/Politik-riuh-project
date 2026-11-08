@@ -36,6 +36,7 @@ Use `docs/whitelist-spec.md` as the requirements baseline. Before writing live f
 5. Provide a verification capability matrix for X/Telegram/Discord tasks. Clearly identify which actions are API-verifiable, manual-review only, or self-attested.
 6. Recommend one option with rationale, but leave provider selection and privacy/retention decisions to Rama.
 7. A static prototype may use dummy data only and must state clearly that it does not submit or store real applications.
+8. Review `docs/token-design.md` venue economics. Attach dated primary-source URLs/evidence and show calculations for fees, creator economics, migration thresholds, and graduation claims. If a claim cannot be verified, remove it or label it unverified. Do not treat Muse's venue preference as an owner decision.
 
 Acceptance:
 - Architecture decision record committed in a feature branch/PR.
