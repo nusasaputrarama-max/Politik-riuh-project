@@ -70,6 +70,12 @@ The site README calls GitHub Pages a proposed target but no Pages configuration,
 ### F-07 — Roadmap and site documentation need synchronization (medium)
 The public Roadmap currently treats token name/ticker decision as still planned. The root README and backlog also need to distinguish the static token site from the separate future news portal in `apps/web/`.
 
+### F-08 — Token venue economics are not source-auditable (high)
+`docs/token-design.md` labels venue costs as verified and includes pump.fun creator economics, migration thresholds, and a graduation-rate estimate, but the source note only refers generally to a fee page/public guides and a study; no direct URLs or archived evidence are attached. These are time-sensitive financial/product claims. Treat them as unverified working estimates until primary-source links, retrieval dates, and calculations are recorded. Muse's venue preference is not an owner decision.
+
+### F-09 — Main branch has no protection (medium)
+GitHub reports `main` as unprotected. For a project with token and applicant-data scope, recommend requiring pull requests, at least one review, and passing CI before merge once CI exists. Do not change repository settings without Rama's approval.
+
 ## Security review
 
 ### Current static prototype
@@ -116,8 +122,9 @@ Separate token decisions still open:
 
 1. Muse: complete PR-013 by fixing Indonesian copy, REFORMASI identity, roadmap/status consistency, and the detailed static-hosting feasibility/rollback note. Work on a feature branch and submit a PR; do not deploy.
 2. Muse: prepare a whitelist architecture decision record against `docs/whitelist-spec.md`, comparing viable backend/database/auth/email options, threat model, operating costs, data flow, backup/retention, and rollback. No real applicant data and no public registration until Rama approves the architecture.
-3. ChatGPT: review the proposed architecture and security controls before implementation.
-4. Rama: make the explicit provider/privacy/quota decisions listed above.
+3. Muse: attach dated primary-source evidence for every token venue fee/economics/migration/graduation claim in `docs/token-design.md`; remove or clearly mark any claim that cannot be verified. ChatGPT reviews before venue selection.
+4. ChatGPT: review the proposed architecture and security controls before implementation.
+5. Rama: make the explicit provider/privacy/quota decisions listed above.
 
 ## Boundaries
 
