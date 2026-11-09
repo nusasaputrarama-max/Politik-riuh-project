@@ -2,7 +2,7 @@
 # POLITIK RIUH — token-site screenshot refresh (PR-013).
 # Usage: bash screenshots.sh   (from apps/token-site/)
 # Serves the site locally on a dynamically allocated port, captures
-# headless-Chrome screenshots into evidence/ (6 desktop + 6 mobile),
+# extended-height headless-Chrome viewport screenshots into evidence/ (6 desktop + 6 mobile),
 # then stops the server. Exit code 0 = all screenshots produced fresh.
 # A capture FAILS unless: the old file was deleted first, Chrome exits 0,
 # the new file is non-empty, and it is a valid PNG with expected dimensions.
@@ -68,18 +68,18 @@ shot() { # $1=url $2=outfile $3=width $4=height
   esac
 }
 
-shot "$BASE/index.html" landing-desktop.png 1280 2600
-shot "$BASE/index.html" landing-mobile.png 390 3800
-shot "$BASE/about.html" about-desktop.png 1280 1000
-shot "$BASE/about.html" about-mobile.png 390 3000
-shot "$BASE/token.html" token-desktop.png 1280 1000
-shot "$BASE/token.html" token-mobile.png 390 3000
-shot "$BASE/launch.html" launch-desktop.png 1280 1000
-shot "$BASE/launch.html" launch-mobile.png 390 3000
-shot "$BASE/transparency.html" transparency-desktop.png 1280 1000
-shot "$BASE/transparency.html" transparency-mobile.png 390 3000
-shot "$BASE/roadmap.html" roadmap-desktop.png 1280 1000
-shot "$BASE/roadmap.html" roadmap-mobile.png 390 3000
+shot "$BASE/index.html" landing-desktop.png 1280 3000
+shot "$BASE/index.html" landing-mobile.png 390 4500
+shot "$BASE/about.html" about-desktop.png 1280 3000
+shot "$BASE/about.html" about-mobile.png 390 4500
+shot "$BASE/token.html" token-desktop.png 1280 3000
+shot "$BASE/token.html" token-mobile.png 390 4500
+shot "$BASE/launch.html" launch-desktop.png 1280 3000
+shot "$BASE/launch.html" launch-mobile.png 390 4500
+shot "$BASE/transparency.html" transparency-desktop.png 1280 3000
+shot "$BASE/transparency.html" transparency-mobile.png 390 4500
+shot "$BASE/roadmap.html" roadmap-desktop.png 1280 3000
+shot "$BASE/roadmap.html" roadmap-mobile.png 390 4500
 
 if [ "$FAIL" = 0 ]; then echo "ALL SCREENSHOTS PASSED (12/12)"; else echo "SCREENSHOTS FAILED (see FAIL lines above)"; fi
 exit "$FAIL"
