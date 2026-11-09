@@ -154,7 +154,8 @@ if re.search(r"0[,.]02\s*SOL", all_text):
 # Present-tense newsroom capability claims: news monitoring / source
 # verification must only ever appear as explicitly future/planned scope.
 for pat in (r"memantau\s+berita", r"pemantauan\s+berita", r"memverifikasi\s+sumber",
-            r"verifikasi\s+sumber", r"memantau\s+isu", r"portal\s+berita\s+kami"):
+            r"verifikasi\s+sumber", r"memantau\s+isu", r"portal\s+berita\s+kami",
+            r"Keputusan\s+editorial\s+dibuat\s+oleh\s+manusia"):
     if re.search(pat, all_text, re.IGNORECASE):
         fails.append(f"present-tense newsroom claim present in public copy: {pat}")
 # Gate 01 must be narrowed to the approved token NAME only.
@@ -172,7 +173,7 @@ if fails:
     sys.exit(1)
 print("PASS: HTML parse 6/6 — lang=id, one <h1>, landmarks, no duplicate ids, links resolve")
 print("PASS: copy discipline — no stale candidate names, no leftover English participant copy, REFORMASI identity present")
-print("PASS: negative regressions — no .wallet-status, no founder name, no 0,02 SOL estimate, no present-tense newsroom claims, Gate 01 narrowed to token name")
+print("PASS: negative regressions — no .wallet-status, no founder name, no 0,02 SOL estimate, no present-tense newsroom/editorial claims, Gate 01 narrowed to token name")
 print("PASS: no forms, fetch/XHR/storage, wallet signing, or secret patterns in site source")
 PYEOF
 [ $? -ne 0 ] && FAIL=1
