@@ -133,7 +133,7 @@ for p in pages:
 # may appear anywhere in the six public HTML pages (not only the footer).
 for p in pages:
     text = Path(p).read_text(encoding="utf-8")
-    if re.search(r"(?:github\\.com/)?nusasaputrarama-max", text, re.IGNORECASE):
+    if re.search(r"nusasaputrarama-max", text, re.IGNORECASE):
         fails.append(f"{p}: exposes the owner GitHub handle or repository URL")
 
 # Site-wide copy discipline
