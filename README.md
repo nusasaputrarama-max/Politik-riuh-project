@@ -2,7 +2,7 @@
 
 **Media politik independen. Membaca isu, menguji narasi, membongkar kepentingan. Berita, analisis, opini, dan satire. Politics meets meme culture.**
 
-**Independent Indonesian political ecosystem** — news & issue monitoring, source verification, political satire & meme community, one Solana meme token, public transparency dashboard.
+**Independent Indonesian political ecosystem** — political satire and meme community, one Solana meme token, and a separate future newsroom/transparency program. News monitoring, source verification, and a public dashboard are not yet implemented.
 
 > **Status: Phase 1 — static token launch website implemented as a local prototype; whitelist and deployment are not implemented.**
 > The six-page site is in `apps/token-site/`. It is not publicly deployed. No whitelist backend, no mainnet deployment, and no real token created.
@@ -10,11 +10,11 @@
 
 ## Vision
 
-1. Political news and issue monitoring.
-2. Source verification and editorial workflows.
+1. Future political news and issue monitoring (**not implemented**).
+2. Future source verification and editorial workflows (**not implemented**).
 3. Political satire and meme community.
 4. One Solana-based meme token.
-5. Public transparency dashboard.
+5. Public transparency dashboard (**planned; not implemented**).
 
 ## Governance
 
