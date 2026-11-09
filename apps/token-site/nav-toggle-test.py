@@ -2,7 +2,7 @@
 """Minimal CDP nav-toggle test for the token site (stdlib only, no deps).
 Starts a local server + headless Chrome on dynamically allocated free ports,
 verifies the spawned server owns its listener and serves the expected page,
-clicks the mobile nav toggle via Runtime.evaluate, and prints NAV-OPEN /
+dispatches real CDP mouse input via Input.dispatchMouseEvent (not DOM .click()), and prints NAV-OPEN /
 ARIA / LABEL. Exit 0 on pass.
 Usage: python3 nav-toggle-test.py [url]  (default http://127.0.0.1:<free-port>/index.html)
 """
