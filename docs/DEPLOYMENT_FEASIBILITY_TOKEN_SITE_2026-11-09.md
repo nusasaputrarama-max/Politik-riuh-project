@@ -9,7 +9,7 @@
 
 ## 1. Executive decision
 
-The current token site is a static HTML/CSS/JavaScript website with six HTML routes, one shared stylesheet, and one small mobile-navigation script. Its README reports zero package dependencies, no build step, no server, no environment variables, no forms, no analytics, and no runtime external requests other than the public repository link.
+The current token site is a static HTML/CSS/JavaScript website with six HTML routes, one shared stylesheet, and one small mobile-navigation script. Its README reports zero package dependencies, no build step, no server, no environment variables, no forms, no analytics, and no runtime external requests. The owner-specific GitHub repository URL has been removed from all six public pages to preserve the anonymous-team identity.
 
 **Recommended hosting candidate: GitHub Pages using a custom GitHub Actions workflow that uploads only `apps/token-site/`.**
 
