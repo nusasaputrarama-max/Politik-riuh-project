@@ -1,0 +1,13 @@
+# Secrets, keys, and local artifacts — never commit these.
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.db
+*.db-wal
+*.db-shm
+node_modules/
+dist/
+build/
+.DS_Store
