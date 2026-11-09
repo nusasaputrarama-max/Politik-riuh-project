@@ -37,7 +37,7 @@ Three viable architectures. All three keep the public site (`apps/token-site/`) 
 | Email verification | Supabase Auth built-in email (magic link doubles as verification) + a transactional provider (e.g. Resend) via SMTP for status mail; verify sender domain before use |
 | Hosting | Supabase cloud (region selectable, e.g. Singapore for SEA latency); static site stays on GitHub Pages (separate, PR-013) |
 | Secrets | Supabase dashboard secrets + Edge Function secrets; service-role key never in browser code; rotate on admin change |
-| Backups | Free tier: none included — manual `pg_dump` exports. Pro: daily backups + point-in-time recovery (add-on) |
+| Backups | Verify plan-specific backup retention, PITR availability/cost, export options and restore guarantees; test restore before any real data |
 | Audit log | Restricted append path with application roles denied UPDATE/DELETE; do not claim protection from the database owner. Treat the hash chain as tamper-evident and anchor periodic signed chain-head digests outside the database. |
 
 ### Option B — VPS self-hosted: Hetzner VPS + Docker + Postgres
@@ -65,7 +65,7 @@ Three viable architectures. All three keep the public site (`apps/token-site/`) 
 | Email verification | Transactional provider (e.g. Resend) called from the Worker; sender domain verified with SPF/DKIM/DMARC |
 | Hosting | Cloudflare edge (global); static site could also move to Pages, but that is a separate decision |
 | Secrets | Cloudflare Workers secrets (dashboard/API); per-environment (staging/production) separation |
-| Backups | D1 has no automatic backup on the free tier — scheduled Worker exports D1 to R2 (SQL dump) nightly; restore is a manual re-import |
+| Backups | Verify current D1 backup/export features and plan limits; any scheduled export to R2 is application-owned and must have a tested restore procedure |
 | Audit log | Append-only table in D1 (no UPDATE/DELETE in the Worker code path) + R2-archived JSON lines |
 
 ### Comparison matrix
@@ -74,15 +74,15 @@ Three viable architectures. All three keep the public site (`apps/token-site/`) 
 |---|---|---|---|
 | Time to a reviewed MVP | Fastest: auth, DB, storage, email-verify in one product | Slowest: build auth, mail, backups, hardening by hand | Medium: API is fast, but auth + backups must be built |
 | Ops burden (solo anonymous team) | Low: patching/backups/HA are the vendor's | High: OS patching, Postgres, TLS, monitoring are ours | Low: no servers; backup export still ours |
-| Applicant login quality | Best: battle-tested Auth, magic links, MFA, session handling | Depends on our implementation; easiest to get wrong | Depends on our implementation; easiest to get wrong |
-| Admin MFA | Built-in TOTP enforcement | Must implement (TOTP lib + enrolment flow) | Must implement (TOTP lib + enrolment flow) |
+| Applicant login quality | Managed Auth building blocks (magic links, sessions, MFA); configuration and server-side enforcement still require testing | Custom implementation and operations burden; requires independent security review | Custom implementation and operations burden; requires independent security review |
+| Admin MFA | Auth supports MFA factors; application must enforce AAL2 server-side on every privileged operation | Must implement and enforce a second factor server-side | Must implement and enforce a second factor server-side |
 | Evidence storage | Storage buckets with signed URLs, RLS policies | Disk/object storage on the VPS; signed URLs must be built | R2 with presigned URLs; access rules in the Worker |
 | Audit trail | Postgres table + RLS; Auth admin events included | Postgres table + file log; must wire log shipping | D1 table + R2 archive; must wire export |
-| Backups at $0 | None (manual export only) | Manual (scripted, we own it) | Manual (scheduled export to R2) |
-| Scale headroom at $0 | 500 MB DB, 50k MAU, 1 GB storage, 5 GB egress; **pauses after 1 week idle** | Full VPS resources; no pause; ~20 TB traffic | 100k req/day, D1 5M rows read/day, R2 10 GB-month |
+| Backup / restore | Verify plan-specific backups, retention, PITR and restore cost; test restore | Team owns encrypted off-site backups and restore tests | Verify D1/R2 export, retention, quota and restore behaviour; test restore |
+| Quotas / capacity | Verify current plan-specific database, MAU, storage, egress, compute and pause limits | Size and load-test the selected SKU; account for disk, traffic and operational limits | Verify current Workers request/CPU and D1/R2 read/write/storage quotas and overages |
 | Vendor lock-in | Low: plain Postgres — `pg_dump` restores anywhere; Auth user export is the awkward part | Lowest: everything is standard OSS, movable by re-provisioning | Medium: D1 is SQLite-compatible but Workers APIs (KV/R2 bindings, D1 API) are Cloudflare-specific; migration = rewrite of the data layer |
 | Data residency control | Region selectable at project creation; data lives in that region | Full control: pick the datacenter (EU/Singapore) | Edge-distributed by design; D1 data location is less directly controllable |
-| Failure modes | Free-tier pause; vendor outage; RLS misconfiguration = data leak | VPS compromise = full data access; missed patching; disk full | Daily quota exhaustion = hard errors until UTC reset; D1 restore is manual |
+| Failure modes | Plan limits or pause behaviour; vendor outage; RLS misconfiguration = data leak | VPS compromise = full data access; missed patching; disk full | Quota exhaustion; Worker/D1 outage; restore depends on verified export procedure |
 
 ## 3. Data flow
 
@@ -179,7 +179,7 @@ No purchase, subscription, domain registration, or provider provisioning is auth
 - **Data residency.** Applicant data is Indonesian users' personal data (email + X handle + wallet). Option A: choose only from the Supabase regions currently offered at project creation; verify the exact region and residency terms from first-party documentation before deciding, and assume a later region change requires migration unless the vendor confirms otherwise. Do not assume a specific region is nearest or available without checking. Option B: choose the exact Hetzner datacenter (for example, Singapore or an EU location) and verify the SKU and legal/residency implications. Option C: edge-distributed; confirm where D1 data is stored and which residency controls apply before selection. **Decision for Rama:** which jurisdiction the applicant database lives in.
 - **Privacy.** Minimize collection to the three registration fields + task evidence (§1). Emails are never logged in plaintext, never exported, never put in analytics. Evidence files are private objects (signed URLs, short expiry) visible only to the applicant and reviewers. No third-party analytics on the registration flow. A privacy notice + affirmative consent screen is required before the first field is submitted (wording is a founder decision).
 - **Abuse controls.** Per-IP and per-email rate limits on registration, verification sends, evidence uploads, and login attempts; CAPTCHA/Turnstile on the public form; duplicate detection on normalized email, X handle, and wallet; velocity alerts (e.g. >50 registrations/hour); evidence upload size/type limits; admin flagging workflow.
-- **Recovery / rollback.** Backups: A Pro daily + PITR add-on; B nightly encrypted dump + snapshot; C nightly D1 export to R2. Restore must be **tested before launch** (a backup that was never restored is not a backup). Rollback of the application: redeploy the previous known-good version (all options support versioned deploys); rollback of data: restore from the last backup — never "undo" by editing the audit log. If the whitelist must be shut down, the procedure is: freeze new registrations, export the decision record, then delete applicant data per the retention policy.
+- **Recovery / rollback.** Define backup frequency, retention, encryption, off-provider copy, recovery-point objective and recovery-time objective for the selected provider/plan. Verify what is included versus paid add-ons from first-party documentation. Restore must be **tested before launch** (a backup that was never restored is not a backup). Rollback the application to a previous known-good version; restore data only through the documented recovery procedure — never "undo" by editing the audit log. If the whitelist must be shut down, freeze new registrations, export the decision record, then delete applicant data per the retention policy.
 - **Vendor lock-in.** A: low (plain Postgres; Auth is the sticky part). B: lowest (standard OSS). C: medium (Workers/D1 APIs). Exit plan for any option: nightly Postgres/SQL dump in an open format stored outside the provider, so a move is a re-provision, not a rescue.
 
 ## 7. Enforcement specification (binding for implementation)
