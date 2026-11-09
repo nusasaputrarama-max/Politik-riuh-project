@@ -79,7 +79,7 @@ python3 nav-toggle-test.py  # exit 0 = toggle navigasi berfungsi
 
 ## Target deployment (diusulkan, belum dikonfigurasi)
 
-**GitHub Pages (diusulkan)** — keputusan D-01 masih terbuka (ChatGPT/Rama). Catatan feasibility lengkap ada di `docs/DEPLOYMENT_FEASIBILITY_TOKEN_SITE_2026-11-09.md`: artifact source harus tepat `apps/token-site/` (bukan root repo), opsi workflow GitHub Actions vs branch, domain kustom, HTTPS, implikasi env/keamanan, dan rollback. Situs berada di subdirektori (`apps/token-site/`), jadi Pages membutuhkan workflow yang memublikasikan direktori itu (atau branch khusus). **Belum ada yang di-deploy; tidak ada setting repo yang diubah.**
+**GitHub Pages (diusulkan)** — keputusan D-01 masih terbuka (technical and founder decisions). Catatan feasibility lengkap ada di `docs/DEPLOYMENT_FEASIBILITY_TOKEN_SITE_2026-11-09.md`: artifact source harus tepat `apps/token-site/` (bukan root repo), opsi workflow GitHub Actions vs branch, domain kustom, HTTPS, implikasi env/keamanan, dan rollback. Situs berada di subdirektori (`apps/token-site/`), jadi Pages membutuhkan workflow yang memublikasikan direktori itu (atau branch khusus). **Belum ada yang di-deploy; tidak ada setting repo yang diubah.**
 
 ## Keterbatasan yang diketahui
 

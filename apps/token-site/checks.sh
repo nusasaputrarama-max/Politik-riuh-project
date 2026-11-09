@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # POLITIK RIUH — token-site reproducible local checks (PR-013).
 # Zero dependencies beyond python3, curl, node (all already on the machine).
-# Usage:  bash checks.sh            (from apps/token-site/)
-# Usage: bash checks.sh
+# Usage: bash checks.sh (from apps/token-site/)
 # Exit code 0 = all checks pass. Any failure prints FAIL and exits non-zero.
 # Screenshots are NOT produced here; see screenshots.sh.
 set -u
