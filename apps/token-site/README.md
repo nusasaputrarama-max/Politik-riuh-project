@@ -48,20 +48,24 @@ python3 nav-toggle-test.py  # exit 0 = toggle navigasi berfungsi
 
 | Check | Hasil |
 |---|---|
-| Route smoke test (`curl`, server lokal) | **8/8 HTTP 200**: `index/about/token/launch/transparency/roadmap.html`, `styles.css`, `main.js` |
+| Route smoke test (`curl`, server lokal) | **8/8 HTTP 200 + konten yang diharapkan per route**: `index/about/token/launch/transparency/roadmap.html`, `styles.css`, `main.js` — server memakai port dinamis yang dialokasikan bebas, readiness polling 15 detik, dan PID server terverifikasi memiliki listener (bukan port tetap 8000) |
 | HTML parse (python `html.parser`) | **6/6 halaman, tanpa error**; `lang="id"`; tepat satu `<h1>` per halaman; landmark `header/nav/main/footer` di setiap halaman; tanpa ID duplikat |
 | Tautan internal | Semua target `href`/`src` resolve di disk (diperiksa per halaman) |
 | Disiplin salinan | Tanpa nama kandidat lama (NENGOK/GORENG/DER); tanpa sisa salinan Inggris yang menghadap peserta; identitas REFORMASI ada; status "Belum diluncurkan" ada; `launch.html` menyatakan whitelist belum dibuka |
+| Regresi negatif (PR-013) | **Tidak ada**: tanpa elemen `.wallet-status` / frasa "Koneksi baca-saja direncanakan", tanpa nama personal founder di salinan publik, tanpa estimasi "0,02 SOL", tanpa klaim newsroom present-tense, Gate 01 hanya "Nama token disetujui" |
 | Form / fetch / storage / dompet | **Tidak ada**: tanpa `<form>`, `fetch()`/XHR, `localStorage`, kode wallet/signing, atau pola secret di source situs |
 | Sintaks JS | `node --check main.js` — lolos |
 | Kontras (spot-check lima pasangan palet) | Teks redup di bg **7,07:1**; headline **18,96:1**; aksen merah di bg **5,06:1**; tombol utama putih di `#C93338` **5,23:1**; hover **5,79:1** — lima pasangan yang diuji lolos AA untuk teks normal (4,5:1); ini bukan audit semua kombinasi warna halaman |
-| Uji fungsional nav toggle (headless Chrome via CDP, lebar 390px) | `NAV-OPEN=true ARIA=true LABEL=Tutup menu` — lolos |
-| Screenshot (headless Chrome 157) | `evidence/landing-desktop.png` (1280×2600 full page), `evidence/landing-mobile.png` (390×3800 full page), `evidence/{about,token,launch,transparency,roadmap}-desktop.png` (1280×1000 viewport) — dicek visual: landing desktop + mobile, token, launch, roadmap tampil benar |
+| Uji fungsional nav toggle (headless Chrome via CDP, lebar 390px) | `NAV-OPEN=true ARIA=true LABEL=Tutup menu` — lolos 3/3 run; port HTTP + CDP dinamis, kepemilikan listener terverifikasi, profil Chrome unik per run |
+| Screenshot (headless Chrome 157) | **12/12**: `evidence/{landing,about,token,launch,transparency,roadmap}-{desktop,mobile}.png` — desktop 1280×2600 (landing) / 1280×1000 (lainnya), mobile 390×3800 (landing) / 390×3000 (lainnya); target lama dihapus sebelum capture, exit code Chrome wajib 0, file segar non-empty, dimensi PNG divalidasi — dicek visual: landing desktop + mobile dan launch mobile tampil benar |
+| Validasi PR (GitHub Actions, non-deploy) | Workflow `.github/workflows/token-site-pr.yml` menjalankan `checks.sh`, `nav-toggle-test.py`, dan `screenshots.sh` di setiap PR yang menyentuh `apps/token-site/`; tanpa job deploy, tanpa Pages |
+| Sidecar bukti | `evidence/SHA256SUMS.txt` — hash SHA-256 untuk 12 screenshot, 3 log run, dan 3 script checks |
 
 ### Koreksi dari screenshot dan checks PR-013
 
 1. **Angka kontras tombol utama di README Fase 1 salah hitung.** Nilai yang tercatat (5,01:1 dan 5,55:1) tidak cocok dengan perhitungan ulang dari palet CSS; nilai yang benar adalah **5,23:1** dan **5,79:1** (keduanya tetap lolos AA). Tabel di atas memakai nilai yang sudah dikoreksi; `checks.sh` menghitung ulang rasio ini setiap kali dijalankan.
 2. **Pola pemindai secret `sk-` sempat false positive** pada `risk-heading` (mengandung substring `sk-`). Pola diperketat menjadi `sk-` + 20+ karakter alfanumerik di `checks.sh`.
+3. **Uji nav-toggle sempat false fail (timeout CDP) di 2026-11-09.** Penyebab: `ws_recv_msg` membuang sisa byte dalam satu segmen TCP ketika Chrome menggabungkan beberapa frame WebSocket (event + respons) — frame respons yang sudah tiba ikut terbuang, lalu recv berikutnya menunggu sampai timeout. Diperbaiki: sisa byte disimpan antar panggilan (juga untuk handshake). Uji kini lolos 3/3 run berurutan.
 
 ### Bug yang ditemukan screenshot dan diperbaiki (Fase 1)
 
@@ -83,7 +87,7 @@ python3 nav-toggle-test.py  # exit 0 = toggle navigasi berfungsi
 
 ## Keterbatasan yang diketahui
 
-- **Tanpa koneksi dompet.** Ditunda sesuai `docs/frontend-stack-decision.md` §2 (opsional di spec; menambah package wallet-adapter akan memperkenalkan dependensi untuk fitur opsional). Header hanya menampilkan status sebagai teks.
+- **Tanpa koneksi dompet.** Ditunda sesuai `docs/frontend-stack-decision.md` §2 (opsional di spec; menambah package wallet-adapter akan memperkenalkan dependensi untuk fitur opsional). Tidak ada elemen status dompet di header atau di halaman mana pun (dihapus PR-013; `checks.sh` menegaskan ketidakhadirannya).
 - **Tanpa backend, tanpa form, tanpa analitik.** Kanal kontak / pelaporan belum dikonfigurasi (dinyatakan sebagai teks biasa di footer).
 - **Fakta token yang masih menunggu keputusan founder:** pemeriksaan kompatibilitas simbol, suplai (konflik 1B vs 10B), desimal, alokasi, venue (D-04), tanggal peluncuran, domain resmi, dan tautan sosial terverifikasi.
 - **Whitelist belum diimplementasikan.** Situs saat ini tanpa form, backend, basis data, dasbor applicant, atau panel admin. Jangan kumpulkan data applicant nyata sampai arsitektur di `docs/whitelist-spec.md` disetujui.

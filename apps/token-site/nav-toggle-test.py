@@ -1,23 +1,42 @@
 #!/usr/bin/env python3
 """Minimal CDP nav-toggle test for the token site (stdlib only, no deps).
-Starts a local server + headless Chrome, clicks the mobile nav toggle via
-Runtime.evaluate, and prints NAV-OPEN / ARIA / LABEL. Exit 0 on pass.
-Usage: python3 nav-toggle-test.py [url]  (default http://127.0.0.1:8000/index.html)
+Starts a local server + headless Chrome on dynamically allocated free ports,
+verifies the spawned server owns its listener and serves the expected page,
+clicks the mobile nav toggle via Runtime.evaluate, and prints NAV-OPEN /
+ARIA / LABEL. Exit 0 on pass.
+Usage: python3 nav-toggle-test.py [url]  (default http://127.0.0.1:<free-port>/index.html)
 """
-import base64, hashlib, json, os, socket, struct, subprocess, sys, time, urllib.request
+import base64, hashlib, json, os, re, shutil, socket, struct, subprocess, sys, tempfile, time, urllib.request
 
-URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8000/index.html"
+def free_port():
+    s = socket.socket(); s.bind(("127.0.0.1", 0))
+    port = s.getsockname()[1]; s.close(); return port
+
+def listener_pid(port):
+    """PID owning the 127.0.0.1:port listener, via `ss` (None if unavailable)."""
+    try:
+        out = subprocess.run(["ss", "-ltnpH", f"sport = :{port}"],
+                             capture_output=True, text=True, timeout=10).stdout
+    except Exception:
+        return None
+    m = re.search(r"pid=(\d+)", out)
+    return int(m.group(1)) if m else None
+
 CHROME = os.environ.get("CHROME", os.path.expanduser("~/chrome-extract/opt/google/chrome/chrome"))
-PORT = 9222
+HTTP_PORT = free_port()
+CDP_PORT = free_port()
+URL = sys.argv[1] if len(sys.argv) > 1 else f"http://127.0.0.1:{HTTP_PORT}/index.html"
+
+_WS_LEFTOVER = {}
 
 def ws_connect(ws_url):
-    # ws://127.0.0.1:9222/devtools/page/<id>
+    # ws://127.0.0.1:<cdp-port>/devtools/page/<id>
     assert ws_url.startswith("ws://")
     rest = ws_url[5:]
     hostport, path = rest.split("/", 1)
     host, port = hostport.split(":")
     key = base64.b64encode(os.urandom(16)).decode()
-    s = socket.create_connection((host, int(port)), timeout=10)
+    s = socket.create_connection((host, int(port)), timeout=30)
     req = (f"GET /{path} HTTP/1.1\r\nHost: {hostport}\r\nUpgrade: websocket\r\n"
            f"Connection: Upgrade\r\nSec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\n\r\n")
     s.sendall(req.encode())
@@ -25,6 +44,10 @@ def ws_connect(ws_url):
     while b"\r\n\r\n" not in buf:
         buf += s.recv(4096)
     assert b"101" in buf.split(b"\r\n")[0], buf[:200]
+    # Keep any bytes already received past the HTTP headers: the first
+    # WebSocket frame may arrive coalesced with the handshake response,
+    # and dropping it would hang the first CDP call until socket timeout.
+    _WS_LEFTOVER[id(s)] = buf.split(b"\r\n\r\n", 1)[1]
     return s
 
 def ws_send(s, text):
@@ -43,7 +66,7 @@ def ws_send(s, text):
     s.sendall(bytes(header) + masked)
 
 def ws_recv_msg(s):
-    data = b""
+    data = _WS_LEFTOVER.pop(id(s), b"")
     while True:
         # read 2-byte header
         while len(data) < 2:
@@ -65,7 +88,13 @@ def ws_recv_msg(s):
             s.sendall(bytes([0x8A, 0x80]) + os.urandom(4))
             continue
         if op == 1:
+            # Preserve any trailing bytes: Chrome may coalesce several
+            # frames into one TCP segment, and the next message is already
+            # in `data`. Dropping it would hang the next recv until timeout.
+            _WS_LEFTOVER[id(s)] = data
             return payload.decode()
+        if op == 8:
+            raise ConnectionError("ws closed by peer")
         if op == 0:
             continue
 
@@ -77,16 +106,37 @@ def cdp(s, mid, method, params=None):
             if "error" in msg: raise RuntimeError(msg["error"])
             return msg.get("result", {})
 
-server = subprocess.Popen([sys.executable, "-m", "http.server", "8000", "--bind", "127.0.0.1"],
+server = subprocess.Popen([sys.executable, "-m", "http.server", str(HTTP_PORT), "--bind", "127.0.0.1"],
                           cwd=os.getcwd(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+# Unique profile dir per run: a stale/shared default profile can make a
+# second Chrome instance attach to (or block on) another process.
+PROFILE_DIR = tempfile.mkdtemp(prefix="token-site-chrome-")
 chrome = subprocess.Popen([CHROME, "--headless=new", "--disable-gpu", "--no-sandbox",
-                           f"--remote-debugging-port={PORT}", "--window-size=390,844", URL],
+                           f"--user-data-dir={PROFILE_DIR}",
+                           f"--remote-debugging-port={CDP_PORT}", "--window-size=390,844", URL],
                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 try:
+    # Readiness polling with timeout (15 s) + content check: the server must
+    # answer with OUR page, not just any HTTP 200 on a colliding port.
+    ready = False
+    for _ in range(30):
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{HTTP_PORT}/index.html", timeout=2) as r:
+                if r.status == 200 and b"REFORMASI" in r.read():
+                    ready = True; break
+        except Exception:
+            time.sleep(0.5)
+    assert ready, f"server did not serve expected content on port {HTTP_PORT} within 15s"
+    owner = listener_pid(HTTP_PORT)
+    if owner is not None:
+        assert owner == server.pid, f"port {HTTP_PORT} owned by pid {owner}, not our server pid {server.pid}"
+        print(f"PASS: spawned server pid {server.pid} owns listener on 127.0.0.1:{HTTP_PORT} (CDP port {CDP_PORT})")
+    else:
+        print(f"INFO: 'ss' unavailable; listener ownership not verified (dynamic free port {HTTP_PORT} + content check still apply)")
     target = None
     for _ in range(30):
         try:
-            tabs = json.load(urllib.request.urlopen(f"http://127.0.0.1:{PORT}/json/list", timeout=2))
+            tabs = json.load(urllib.request.urlopen(f"http://127.0.0.1:{CDP_PORT}/json/list", timeout=2))
             target = next(t for t in tabs if t["type"] == "page")
             break
         except Exception:
@@ -115,3 +165,8 @@ try:
     sys.exit(0 if ok else 1)
 finally:
     chrome.terminate(); server.terminate()
+    try:
+        chrome.wait(timeout=10); server.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        chrome.kill(); server.kill()
+    shutil.rmtree(PROFILE_DIR, ignore_errors=True)

@@ -1,0 +1,15 @@
+INFO: allocated free port 40605
+PASS: spawned server pid 6129 owns listener on 127.0.0.1:40605
+PASS: evidence/landing-desktop.png (1280x2600)
+PASS: evidence/landing-mobile.png (390x3800)
+PASS: evidence/about-desktop.png (1280x1000)
+PASS: evidence/about-mobile.png (390x3000)
+PASS: evidence/token-desktop.png (1280x1000)
+PASS: evidence/token-mobile.png (390x3000)
+PASS: evidence/launch-desktop.png (1280x1000)
+PASS: evidence/launch-mobile.png (390x3000)
+PASS: evidence/transparency-desktop.png (1280x1000)
+PASS: evidence/transparency-mobile.png (390x3000)
+PASS: evidence/roadmap-desktop.png (1280x1000)
+PASS: evidence/roadmap-mobile.png (390x3000)
+ALL SCREENSHOTS PASSED (12/12)

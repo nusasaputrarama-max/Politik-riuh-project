@@ -4,30 +4,74 @@
 # Usage: bash checks.sh (from apps/token-site/)
 # Exit code 0 = all checks pass. Any failure prints FAIL and exits non-zero.
 # Screenshots are NOT produced here; see screenshots.sh.
+# Server port: allocated dynamically from a free port (never a fixed 8000);
+# the spawned server's PID is verified to own the listener before any
+# HTTP result is accepted, so an unrelated process can never false-pass.
 set -u
 cd "$(dirname "$0")"
 
-PORT="${PORT:-8000}"
-BASE="http://127.0.0.1:${PORT}"
 FAIL=0
 pass() { echo "PASS: $1"; }
 fail() { echo "FAIL: $1"; FAIL=1; }
 
-# --- 1. Serve the site locally -------------------------------------------
+free_port() {
+  python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()'
+}
+
+# --- 1. Serve the site locally on a dynamically allocated port -----------
+PORT="$(free_port)"
+echo "INFO: allocated free port $PORT"
 python3 -m http.server "$PORT" --bind 127.0.0.1 >/tmp/token-site-server.log 2>&1 &
 SERVER_PID=$!
 trap 'kill $SERVER_PID 2>/dev/null || true' EXIT
-sleep 1
+BASE="http://127.0.0.1:${PORT}"
 
-# --- 2. Route smoke test: 8/8 HTTP 200 ------------------------------------
-ROUTES=( "/" "index.html" "about.html" "token.html" "launch.html" "transparency.html" "roadmap.html" "styles.css" "main.js" )
-# "/" and "index.html" are the same resource; count distinct URLs served = 8
+# Readiness polling with timeout (15 s): wait until OUR server answers.
+READY=0
+for _ in $(seq 1 30); do
+  if curl -fs -o /dev/null "$BASE/index.html" 2>/dev/null; then READY=1; break; fi
+  sleep 0.5
+done
+[ "$READY" = 1 ] || { fail "server did not become ready on port $PORT within 15s"; echo "CHECKS FAILED (see FAIL lines above)"; exit 1; }
+
+# Verify the spawned server PID owns the listener on $PORT (when `ss` exists).
+# A collision with an unrelated process is a hard FAIL, not a silent pass.
+if command -v ss >/dev/null 2>&1; then
+  LISTENER_PID="$(ss -ltnpH "sport = :$PORT" 2>/dev/null | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2)"
+  if [ -z "$LISTENER_PID" ]; then
+    fail "no listener found on port $PORT (ss)"
+  elif [ "$LISTENER_PID" != "$SERVER_PID" ]; then
+    fail "port $PORT is owned by pid $LISTENER_PID, not our server pid $SERVER_PID"
+  else
+    pass "spawned server pid $SERVER_PID owns listener on 127.0.0.1:$PORT"
+  fi
+else
+  echo "INFO: 'ss' not available; listener ownership not verified (dynamic free port + content checks still apply)"
+fi
+
+# --- 2. Route smoke test: 8/8 HTTP 200 + expected content -----------------
+# HTTP 200 alone is not proof: each route must also contain its expected
+# marker text, so a wrong server answering 200 still fails.
+declare -A EXPECTED=(
+  ["index.html"]="Belum diluncurkan"
+  ["about.html"]="bukan portal berita"
+  ["token.html"]="Token belum dibuat"
+  ["launch.html"]="Nama token disetujui"
+  ["transparency.html"]="belum difinalisasi"
+  ["roadmap.html"]="Nama token REFORMASI disetujui"
+  ["styles.css"]="--"
+  ["main.js"]="data-nav-toggle"
+)
 OK=0
 for r in "index.html" "about.html" "token.html" "launch.html" "transparency.html" "roadmap.html" "styles.css" "main.js"; do
-  CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/$r")
-  if [ "$CODE" = "200" ]; then OK=$((OK+1)); else fail "route /$r returned HTTP $CODE"; fi
+  BODY="$(curl -fs "$BASE/$r" 2>/dev/null)" || { fail "route /$r did not return HTTP 200"; continue; }
+  MARKER="${EXPECTED[$r]}"
+  case "$BODY" in
+    *"$MARKER"*) OK=$((OK+1)) ;;
+    *) fail "route /$r returned 200 but lacks expected content: $MARKER" ;;
+  esac
 done
-[ "$OK" = 8 ] && pass "route smoke test 8/8 HTTP 200"
+[ "$OK" = 8 ] && pass "route smoke test 8/8 HTTP 200 with expected page content"
 
 # --- 3. HTML + copy checks (python stdlib only) ---------------------------
 python3 - <<'PYEOF'
@@ -94,6 +138,22 @@ if "Belum diluncurkan" not in all_text:
     fails.append("launch status 'Belum diluncurkan' missing")
 if "belum dibuka" not in Path("launch.html").read_text(encoding="utf-8").lower():
     fails.append("launch.html does not state the whitelist is not yet open")
+
+# Negative regression assertions (PR-013 acceptance criteria 1-5):
+# these exact regressions must fail the run if they ever return.
+if re.search(r"\bRama\b", all_text):
+    fails.append("founder's personal name 'Rama' present in public copy (team is anonymous)")
+if re.search(r"0[,.]02\s*SOL", all_text):
+    fails.append("unverified launch-cost estimate '0,02 SOL' present in public copy")
+# Present-tense newsroom capability claims: news monitoring / source
+# verification must only ever appear as explicitly future/planned scope.
+for pat in (r"memantau\s+berita", r"pemantauan\s+berita", r"memverifikasi\s+sumber",
+            r"verifikasi\s+sumber", r"memantau\s+isu", r"portal\s+berita\s+kami"):
+    if re.search(pat, all_text, re.IGNORECASE):
+        fails.append(f"present-tense newsroom claim present in public copy: {pat}")
+# Gate 01 must be narrowed to the approved token NAME only.
+if "Konsep disetujui" in all_text or "Keputusan konsep token" in all_text:
+    fails.append("Gate 01 still claims the whole token concept is approved (only the name is)")
 # No wallet/signing/transaction code anywhere in the site tree
 site = "\n".join(p.read_text(encoding="utf-8", errors="ignore") for p in Path(".").rglob("*") if p.is_file() and p.suffix in (".html", ".js", ".css") and "evidence" not in p.parts)
 for pat in (r"signTransaction", r"signMessage", r"sendTransaction", r"connect\(\)", r"window\.solana", r"@solana/", r"api_key", r"sk-[A-Za-z0-9]{20,}"):
@@ -106,6 +166,7 @@ if fails:
     sys.exit(1)
 print("PASS: HTML parse 6/6 — lang=id, one <h1>, landmarks, no duplicate ids, links resolve")
 print("PASS: copy discipline — no stale candidate names, no leftover English participant copy, REFORMASI identity present")
+print("PASS: negative regressions — no .wallet-status, no founder name, no 0,02 SOL estimate, no present-tense newsroom claims, Gate 01 narrowed to token name")
 print("PASS: no forms, fetch/XHR/storage, wallet signing, or secret patterns in site source")
 PYEOF
 [ $? -ne 0 ] && FAIL=1
@@ -113,7 +174,12 @@ PYEOF
 # --- 4. JS syntax ----------------------------------------------------------
 node --check main.js && pass "node --check main.js" || fail "node --check main.js"
 
-# --- 5. WCAG contrast spot-check (five declared palette pairs only) --------
+# --- 5. Contrast: five-pair palette spot-check (NOT a full WCAG audit) -----
+# This checks five declared foreground/background pairs only. It does not
+# establish full-page WCAG AA compliance or keyboard/focus behaviour; do not
+# describe it as a complete audit. Manual keyboard/focus matrix: Tab through
+# each page, toggle opens/closes with Enter/Space, focus ring visible on
+# every link/button (see README "Keterbatasan yang diketahui").
 python3 - <<'PYEOF'
 def lum(hexs):
     r, g, b = (int(hexs[i:i+2], 16) / 255 for i in (1, 3, 5))
