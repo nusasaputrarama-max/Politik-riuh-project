@@ -129,17 +129,12 @@ for p in pages:
     if 'lang="en"' in text:
         fails.append(f"{p}: leftover lang=\"en\" attribute")
 
-# Footer must not link to the public repository (anonymous team): the
-# owner handle must not be exposed through the site footer. The one
-# remaining repository URL (transparency.html body copy, where the repo
-# is described as the record of decisions) is content, not a footer
-# link, and is intentionally left in place; see the accessibility
-# review and the PR-013 acceptance notes for the full inventory.
+# Anonymous team: no owner-specific GitHub handle or direct repository URL
+# may appear anywhere in the six public HTML pages (not only the footer).
 for p in pages:
     text = Path(p).read_text(encoding="utf-8")
-    m = re.search(r"<footer.*?</footer>", text, re.DOTALL | re.IGNORECASE)
-    if m and ("github.com" in m.group(0) or "nusasaputrarama-max" in m.group(0)):
-        fails.append(f"{p}: footer still links to the public repository")
+    if re.search(r"(?:github\\.com/)?nusasaputrarama-max", text, re.IGNORECASE):
+        fails.append(f"{p}: exposes the owner GitHub handle or repository URL")
 
 # Site-wide copy discipline
 all_text = "\n".join(Path(p).read_text(encoding="utf-8") for p in pages)
@@ -185,7 +180,7 @@ if fails:
     sys.exit(1)
 print("PASS: HTML parse 6/6 — lang=id, one <h1>, landmarks, no duplicate ids, links resolve")
 print("PASS: copy discipline — no stale candidate names, no leftover English participant copy, REFORMASI identity present")
-print("PASS: footer — no public repository link in any page footer")
+print("PASS: anonymous identity — no owner GitHub handle or direct repository URL in any public page")
 print("PASS: negative regressions — no .wallet-status, no founder name, no 0,02 SOL estimate, no present-tense newsroom/editorial claims, Gate 01 narrowed to token name")
 print("PASS: no forms, fetch/XHR/storage, wallet signing, or secret patterns in site source")
 PYEOF
