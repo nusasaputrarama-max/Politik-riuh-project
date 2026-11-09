@@ -28,7 +28,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # actions/checkout v6.0.0
 
+      - name: Check test harness availability
+        id: harness
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f apps/token-site/checks.sh && -f apps/token-site/nav-toggle-test.py && -f apps/token-site/screenshots.sh ]]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "All required token-site test scripts are present."
+          elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Post-merge validation is deferred until the PR-013 test harness is merged."
+          else
+            echo "::error::PR validation requires checks.sh, nav-toggle-test.py, and screenshots.sh."
+            exit 1
+          fi
+
       - name: Install Chrome
+        if: steps.harness.outputs.available == 'true'
         id: chrome
         uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
         with:
@@ -36,11 +53,13 @@ jobs:
           install-dependencies: true
 
       - name: Export Chrome path
+        if: steps.harness.outputs.available == 'true'
         run: |
           echo "CHROME=${{ steps.chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
           echo "CHROME_VERSION=${{ steps.chrome.outputs.chrome-version }}" >> "$GITHUB_ENV"
 
       - name: Check required tools
+        if: steps.harness.outputs.available == 'true'
         run: |
           command -v bash
           command -v curl
@@ -51,6 +70,7 @@ jobs:
           echo "Chrome: $CHROME_VERSION"
 
       - name: Static, route, copy, security-pattern, heading and contrast checks
+        if: steps.harness.outputs.available == 'true'
         working-directory: apps/token-site
         shell: bash
         run: |
@@ -59,6 +79,7 @@ jobs:
           bash checks.sh 2>&1 | tee evidence/ci-checks.log
 
       - name: Mobile navigation test (three independent runs)
+        if: steps.harness.outputs.available == 'true'
         working-directory: apps/token-site
         shell: bash
         run: |
@@ -70,6 +91,7 @@ jobs:
           done
 
       - name: Refresh and validate desktop/mobile screenshots
+        if: steps.harness.outputs.available == 'true'
         working-directory: apps/token-site
         shell: bash
         run: |
@@ -77,7 +99,7 @@ jobs:
           bash screenshots.sh 2>&1 | tee evidence/ci-screenshots.log
 
       - name: Generate evidence checksums
-        if: always()
+        if: always() && steps.harness.outputs.available == 'true'
         working-directory: apps/token-site
         shell: bash
         run: |
@@ -87,7 +109,7 @@ jobs:
           sha256sum checks.sh screenshots.sh nav-toggle-test.py >> CI-SHA256SUMS.txt
 
       - name: Upload CI evidence (screenshots, logs, SHA-256)
-        if: always()
+        if: always() && steps.harness.outputs.available == 'true'
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # actions/upload-artifact v6.0.0
         with:
           name: token-site-evidence-${{ github.run_id }}
