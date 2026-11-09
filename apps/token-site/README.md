@@ -57,7 +57,7 @@ python3 nav-toggle-test.py  # exit 0 = toggle navigasi berfungsi
 | Sintaks JS | `node --check main.js` — lolos |
 | Kontras (spot-check lima pasangan palet) | Teks redup di bg **7,07:1**; headline **18,96:1**; aksen merah di bg **5,06:1**; tombol utama putih di `#C93338` **5,23:1**; hover **5,79:1** — lima pasangan yang diuji lolos AA untuk teks normal (4,5:1); ini bukan audit semua kombinasi warna halaman |
 | Uji fungsional nav toggle (headless Chrome via CDP, lebar 390px) | Commit `0352be1` memperbaiki race CDP: server harus siap sebelum Chrome dibuka, target harus cocok dengan URL yang diuji, dan keberadaan kontrol ditunggu sebelum klik. Run #42548023924 sebelumnya gagal karena memilih page target yang salah; hasil ulang setelah perbaikan menunggu. |
-| Screenshot (headless Chrome 157) | **12/12** desktop + mobile berhasil dibuat dan dimensi PNG divalidasi pada run #42547935290; visual spot-check independen: landing mobile, launch mobile, About mobile, dan roadmap desktop tampil tanpa overflow yang tampak. Screenshot adalah render lokal, bukan bukti deployment. |
+| Screenshot (headless Chrome 157) | Commit `1aae960` menaikkan snapshot desktop ke 1280x3000 dan mobile ke 390x4500 agar konten bawah halaman tidak terpotong seperti capture 1000/3000 sebelumnya. Run baru akan mengunggah PNG + SHA-256; perlu inspeksi hasil. |
 | Validasi PR (GitHub Actions, non-deploy) | Workflow Node 24 dari `main` tersinkron; artifact menyimpan `evidence/` + tiga script pada struktur path yang dapat diverifikasi, dengan `CI-SHA256SUMS.txt` di root ZIP. Run baru menunggu. `contents: read` saja; tanpa deploy, Pages, secrets, wallet, atau `apps/web/`. |
 | Sidecar bukti | `evidence/SHA256SUMS.txt` — hash SHA-256 untuk 12 screenshot, 3 log run, dan 3 script checks |
 
