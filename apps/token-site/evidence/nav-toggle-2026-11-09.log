@@ -1,3 +1,9 @@
-PASS: spawned server pid 5944 owns listener on 127.0.0.1:42685 (CDP port 39143)
-NAV-OPEN=true ARIA=true LABEL=Tutup menu
-PASS: nav toggle opens, aria-expanded=true, label=Tutup menu
+NAV-TOGGLE RUN 1/3
+INITIAL=true OPEN=true CLOSED=true
+PASS: nav toggle initial/open/close states and ARIA labels are correct
+NAV-TOGGLE RUN 2/3
+INITIAL=true OPEN=true CLOSED=true
+PASS: nav toggle initial/open/close states and ARIA labels are correct
+NAV-TOGGLE RUN 3/3
+INITIAL=true OPEN=true CLOSED=true
+PASS: nav toggle initial/open/close states and ARIA labels are correct

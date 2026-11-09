@@ -15,10 +15,14 @@ HTML/CSS/JS statis murni. **Tanpa dependensi**: tanpa package manager, tanpa bui
 | `transparency.html` | Pengungkapan alokasi / treasury / dompet (semuanya belum tersedia) |
 | `roadmap.html` | Milestone dengan label status yang didukung bukti repositori |
 | `styles.css` | Sistem desain bersama (lihat di bawah) |
-| `main.js` | Satu perilaku saja: toggle navigasi mobile (progressive enhancement) |
-| `checks.sh` | Checks lokal yang dapat direproduksi (rute, HTML, salinan, JS, kontras) |
+| `main.js` | Satu perilaku saja: toggle navigasi mobile (progressive enhancement) + Escape menutup menu yang terbuka dan mengembalikan fokus ke tombol |
+| `checks.sh` | Checks lokal yang dapat direproduksi (rute, HTML, salinan, footer, JS, kontras) |
 | `screenshots.sh` | Refresh screenshot dengan headless Chrome |
 | `nav-toggle-test.py` | Uji fungsional toggle navigasi via Chrome DevTools Protocol (stdlib saja) |
+| `cdp_helper.py` | Klien CDP stdlib bersama untuk `keyboard-test.py`, `reduced-motion-test.py`, `a11y-review.py` (`nav-toggle-test.py` lebih dulu dan menyimpan salinan inline-nya sendiri) |
+| `keyboard-test.py` | Matriks keyboard-only via CDP: urutan Tab, skip link, fokus terlihat, Enter/Space, Escape + focus return, Shift+Tab — semua enam halaman, desktop + mobile |
+| `reduced-motion-test.py` | Verifikasi `prefers-reduced-motion` via emulasi media CDP (kontrol vs reduce vs kembali) |
+| `a11y-review.py` | Review aksesibilitas lebih luas: heading, alt text, landmark, label, fokus, + sapuan kontras terhitung per elemen; menulis `docs/accessibility-review-YYYY-MM-DD.md` |
 | `evidence/` | Screenshot dari checks di bawah |
 
 ## Sistem desain
@@ -44,6 +48,9 @@ cd apps/token-site
 bash checks.sh            # exit 0 = semua checks lolos
 bash screenshots.sh       # exit 0 = semua screenshot ter-refresh
 python3 nav-toggle-test.py  # exit 0 = toggle navigasi berfungsi
+python3 keyboard-test.py    # exit 0 = matriks keyboard-only lolos (6 halaman)
+python3 reduced-motion-test.py  # exit 0 = reduced-motion terbukti via emulasi CDP
+python3 a11y-review.py      # exit 0 = review aksesibilitas tanpa defect keras
 ```
 
 | Check | Hasil |
@@ -57,9 +64,13 @@ python3 nav-toggle-test.py  # exit 0 = toggle navigasi berfungsi
 | Sintaks JS | `node --check main.js` — lolos |
 | Kontras (spot-check lima pasangan palet) | Teks redup di bg **7,07:1**; headline **18,96:1**; aksen merah di bg **5,06:1**; tombol utama putih di `#C93338` **5,23:1**; hover **5,79:1** — lima pasangan yang diuji lolos AA untuk teks normal (4,5:1); ini bukan audit semua kombinasi warna halaman |
 | Uji fungsional nav toggle (headless Chrome via CDP, lebar 390px) | GitHub Actions run #42556069910 pada head `7ae3174b72980cf1829a7c7ab3d73d72173fcb0f`: **3/3** run lulus; `INITIAL=true OPEN=true CLOSED=true`; memverifikasi state/ARIA, target URL, readiness server, dan cleanup. Tes ini mengaktifkan tombol melalui CDP click; **bukan** pengujian keyboard-only (Tab/Enter/Space/Escape). |
+| Matriks keyboard-only (headless Chrome via CDP, input keyboard nyata) | `keyboard-test.py`, 2026-11-09 lokal, **exit 0**: urutan Tab 15–19 stop per halaman (set == elemen focusable DOM), skip link terlihat saat fokus (`top: 12px`) dan Enter memindahkan fokus ke `<main tabindex="-1">`, outline fokus 2px merah solid di semua stop, Space/Enter membuka-menutup toggle, Escape menutup + mengembalikan fokus ke toggle, Shift+Tab mundur, Enter pada tautan nav bernavigasi — semua enam halaman, desktop 1280px + mobile 390px. Log: `evidence/keyboard-2026-11-09.log`. |
+| Reduced motion (emulasi media CDP) | `reduced-motion-test.py`, 2026-11-09 lokal, **exit 0**: kontrol `no-preference` (`scroll-behavior: smooth`, transisi skip-link `0.15s`) → emulasi `reduce` (`matchMedia` cocok, `scroll-behavior: auto`, transisi `0s`/`none`) → kembali ke `no-preference` (perilaku berbalik). Membuktikan media query bekerja di browser, bukan sekadar ada di CSS. Log: `evidence/reduced-motion-2026-11-09.log`. |
+| Review aksesibilitas lebih luas | `docs/accessibility-review-2026-11-09.md` + `a11y-review.py`, 2026-11-09 lokal, **exit 0, tanpa defect keras**: `lang="id"` 6/6, satu `<h1>` 6/6, heading tanpa lompat level, landmark lengkap, tanpa ID duplikat, semua `aria-labelledby` resolve, tanpa elemen `<img>` (glow dekoratif adalah `<div aria-hidden>`), tanpa teks tautan samar/kosong, semua tombol bernama, skip link → `<main tabindex="-1">`. Sapuan kontras terhitung: **360 elemen teks, 0 di bawah ambang** (terendah 5,06:1 aksen merah, 5,23:1 tombol utama). **Bukan klaim konformansi WCAG** — tanpa pengujian screen reader; lihat celah terbuka di dokumen review. |
+| Tautan footer repositori publik | **Dihapus dari footer keenam halaman** (2026-11-09, keputusan tim anonim; `checks.sh` kini gagal bila footer mengandung tautan repositori). Satu URL repositori tersisa di **isi** `transparency.html:82` (paragraf yang menjelaskan repositori sebagai catatan keputusan) — bukan footer, sengaja dipertahankan dan dilaporkan apa adanya; tidak dibuat URL/organisasi pengganti. |
 | Screenshot (headless Chrome) | Run #42556069910 menghasilkan **12/12** capture baru: desktop 1280x3000 dan mobile 390x4500; script menghapus file lama, memeriksa exit code Chrome, ukuran file, dan dimensi PNG. Ini membuktikan capture berhasil, bukan audit visual menyeluruh. |
 | Validasi PR (GitHub Actions, non-deploy) | Run #42556069910 pada head `7ae3174b72980cf1829a7c7ab3d73d72173fcb0f` selesai **success**; semua langkah validasi, tiga run navigasi, 12 screenshot, checksum, dan upload berhasil. Artifact #13647213466, 2.981.115 bytes; ZIP SHA-256 `db3e3f41fd88c051edb86cec78d1cbf1b24e98f6158bf7560a4d5d137ff83742`; manifest SHA-256 `3088b07ca6e422ff82ca904812b66fa851b6247d8d23de7a930f9d78f7f0f91c`; **20/20** checksum entries PASS (independent archive verification recorded in PR comment `6732082342`). Tidak ada deploy, Pages, secret, wallet, atau perubahan `apps/web/`. |
-| Sidecar bukti | `evidence/SHA256SUMS.txt` — hash SHA-256 untuk 12 screenshot, 3 log run, dan 3 script checks |
+| Sidecar bukti | `evidence/SHA256SUMS.txt` — hash SHA-256 untuk 12 screenshot, 6 log run, dan 7 script checks |
 
 ### Koreksi dari screenshot dan checks PR-013
 
@@ -91,8 +102,8 @@ python3 nav-toggle-test.py  # exit 0 = toggle navigasi berfungsi
 - **Tanpa backend, tanpa form, tanpa analitik.** Kanal kontak / pelaporan belum dikonfigurasi (dinyatakan sebagai teks biasa di footer).
 - **Fakta token yang masih menunggu keputusan founder:** pemeriksaan kompatibilitas simbol, suplai (konflik 1B vs 10B), desimal, alokasi, venue (D-04), tanggal peluncuran, domain resmi, dan tautan sosial terverifikasi.
 - **Whitelist belum diimplementasikan.** Situs saat ini tanpa form, backend, basis data, dasbor applicant, atau panel admin. Jangan kumpulkan data applicant nyata sampai arsitektur di `docs/whitelist-spec.md` disetujui.
-- **Dukungan reduced-motion baru diverifikasi lewat inspeksi kode** (media query `prefers-reduced-motion` ada dan menonaktifkan smooth scrolling/transisi); belum diuji melalui emulasi media browser atau pengaturan OS yang aktif.
-- **Keyboard-only belum diverifikasi.** Tes nav CDP saat ini memicu tombol melalui `Runtime.evaluate`/click; belum membuktikan urutan Tab, skip link, Enter/Space, Escape, atau focus return.
-- **Tautan repositori publik perlu keputusan founder.** Link GitHub pada footer memperlihatkan handle pemilik repository; pertahankan atau hapus hanya setelah keputusan eksplisit, dan jangan menggantinya dengan domain/organisasi yang belum ada.
+- **Dukungan reduced-motion terbukti lewat emulasi media browser** (`reduced-motion-test.py`, 2026-11-09): `prefers-reduced-motion: reduce` mengubah `scroll-behavior` menjadi `auto` dan transisi menjadi `none` di Chrome headless, lalu berbalik saat emulasi dilepas.
+- **Keyboard-only terverifikasi** (`keyboard-test.py`, 2026-11-09): urutan Tab, skip link, Enter/Space, Escape + focus return, dan fokus terlihat — semua enam halaman, desktop + mobile, input keyboard nyata via CDP.
+- **Tautan repositori publik dihapus dari footer** (2026-11-09, keputusan tim anonim). Satu URL tersisa di isi `transparency.html:82` (bukan footer); tidak ada URL/organisasi pengganti. `checks.sh` menegakkannya sebagai regresi.
 - **Screenshot adalah render lokal** (headless Chrome 157 terhadap server lokal), bukan tangkapan situs yang sudah di-deploy.
 - Screenshot mobile founder dari Elysium **tidak ada** di repo dan tidak dipakai; desain bekerja dari deskripsi tertulis atas referensi saja, dan tidak mengkloning referensi mana pun.

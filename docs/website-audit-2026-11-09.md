@@ -194,3 +194,85 @@ Next Muse work is the keyboard-only and reduced-motion evidence on PR-013, follo
 ### Safety boundary
 
 No Pages deployment, public preview, backend, live registration, applicant data collection, wallet connection/signing, token mint/distribution, mainnet action or funds movement was performed or authorized.
+
+---
+
+## Muse response — 2026-11-09 (acceptance blockers 1–5)
+
+Work on branch `muse/pr-013-site-review-id`, after the 11:20 WIB delta.
+PR #4 was NOT merged by this work; PR #5 / PR-014 and PR #2 untouched.
+
+### 1. Keyboard-only coverage — DONE (real input, exit 0)
+
+- New `apps/token-site/keyboard-test.py` (stdlib-only CDP, shared client in
+  `apps/token-site/cdp_helper.py`; `nav-toggle-test.py` untouched, keeps its
+  inline client). Real `Input.dispatchKeyEvent` Tab/Enter/Space/Escape/
+  Shift+Tab — no `Runtime.evaluate` clicks.
+- `main.js`: Escape now closes an open menu and returns focus to the toggle
+  (new behaviour; previously Escape did nothing). `<main id="main">` gained
+  `tabindex="-1"` on all six pages so skip-link activation moves focus.
+- Results, local headless Chrome 157, exit 0, log
+  `apps/token-site/evidence/keyboard-2026-11-09.log`: Tab sweeps 19/16/16/16/
+  17/15 stops (index/about/token/launch/transparency/roadmap), each set equal
+  to the DOM focusable set; skip link visible on focus (`top: 12px`) and
+  Enter moves focus to `<main>`; 2px solid red `:focus-visible` outline on
+  every stop; Space/Enter toggle the menu; Escape closes + focus returns to
+  the toggle; Shift+Tab moves backwards; Enter on a nav link navigates.
+  First run caught a test bug (footer repeats the nav labels, so the
+  order assertion matched 12 stops instead of 5); fixed in the test, not
+  in the site — the site was correct.
+
+### 2. Reduced motion — DONE (emulation, exit 0)
+
+- New `apps/token-site/reduced-motion-test.py` (CDP
+  `Emulation.setEmulatedMedia`). Control `no-preference`: `scroll-behavior:
+  smooth`, skip-link transition `0.15s`. Emulated `reduce`: media query
+  matches, `scroll-behavior: auto`, transition `0s`/`none`. Restored
+  `no-preference`: behaviour flips back. Log
+  `apps/token-site/evidence/reduced-motion-2026-11-09.log`.
+
+### 3. Broader accessibility review — DONE (no hard defects)
+
+- `docs/accessibility-review-2026-11-09.md` + `apps/token-site/a11y-review.py`:
+  static parse (heading outlines, landmarks, duplicate ids,
+  `aria-labelledby` targets, image inventory, link/button names, skip-link
+  target, `<main>` tabindex, `lang`) plus a browser computed-contrast sweep
+  over every visible text element: **360 elements, 0 below threshold**
+  (worst 5.06:1 red accent, 5.23:1 primary button). No `<img>` elements;
+  decorative glow is an `aria-hidden` `<div>`.
+- Open gaps are documented in the review, not hidden: no screen-reader
+  testing, no manual real-keyboard pass, contrast sweep approximates text
+  over the hero glow with the body background. **No WCAG conformance is
+  claimed.**
+
+### 4. Footer repository link — REMOVED (per anonymous-team decision)
+
+- The `Repositori GitHub` link was removed from the footer of all six
+  pages. No replacement URL or organization was invented.
+- `checks.sh` now fails if any page footer links to the public repository.
+- Remaining repository URL, reported as-is: `transparency.html:82`, in the
+  body copy (the repository is described as the record of decisions) — not
+  a footer link, intentionally kept. `roadmap.html:84` mentions "GitHub
+  Pages" feasibility in prose (not a URL). Removing the site link does not
+  anonymize the public repository itself.
+
+### 5. Reconcile + rerun — DONE
+
+- Merged `main` `4707a74` into the branch (merge commit `b351005`), no
+  conflicts; no other party's work was discarded.
+- Full local rerun after the merge: `checks.sh` exit 0, `nav-toggle-test.py`
+  3/3, `keyboard-test.py` exit 0, `reduced-motion-test.py` exit 0,
+  `a11y-review.py` exit 0, `screenshots.sh` 12/12; evidence refreshed
+  (screenshots + `SHA256SUMS.txt` + logs).
+- CI workflow (`.github/workflows/token-site-pr.yml`) extended with the
+  three new test steps; harness-availability guard, checksum list and
+  artifact upload updated to include the new scripts and logs.
+
+### What still blocks acceptance, in Muse's view
+
+- Re-review of this new evidence by the auditor (ChatGPT). The evidence
+  is committed on the branch; CI will run it on the PR.
+- Manual keyboard pass on a real device and screen-reader testing were
+  not done (documented gaps, not blockers invented by this response).
+- PR-014 and the founder decisions listed in the original audit (provider,
+  privacy, quota, supply, venue) remain open and are untouched by this work.

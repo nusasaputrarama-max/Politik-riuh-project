@@ -129,6 +129,18 @@ for p in pages:
     if 'lang="en"' in text:
         fails.append(f"{p}: leftover lang=\"en\" attribute")
 
+# Footer must not link to the public repository (anonymous team): the
+# owner handle must not be exposed through the site footer. The one
+# remaining repository URL (transparency.html body copy, where the repo
+# is described as the record of decisions) is content, not a footer
+# link, and is intentionally left in place; see the accessibility
+# review and the PR-013 acceptance notes for the full inventory.
+for p in pages:
+    text = Path(p).read_text(encoding="utf-8")
+    m = re.search(r"<footer.*?</footer>", text, re.DOTALL | re.IGNORECASE)
+    if m and ("github.com" in m.group(0) or "nusasaputrarama-max" in m.group(0)):
+        fails.append(f"{p}: footer still links to the public repository")
+
 # Site-wide copy discipline
 all_text = "\n".join(Path(p).read_text(encoding="utf-8") for p in pages)
 for name in ("NENGOK", "GORENG", "DER"):
@@ -173,6 +185,7 @@ if fails:
     sys.exit(1)
 print("PASS: HTML parse 6/6 — lang=id, one <h1>, landmarks, no duplicate ids, links resolve")
 print("PASS: copy discipline — no stale candidate names, no leftover English participant copy, REFORMASI identity present")
+print("PASS: footer — no public repository link in any page footer")
 print("PASS: negative regressions — no .wallet-status, no founder name, no 0,02 SOL estimate, no present-tense newsroom/editorial claims, Gate 01 narrowed to token name")
 print("PASS: no forms, fetch/XHR/storage, wallet signing, or secret patterns in site source")
 PYEOF
@@ -184,9 +197,10 @@ node --check main.js && pass "node --check main.js" || fail "node --check main.j
 # --- 5. Contrast: five-pair palette spot-check (NOT a full WCAG audit) -----
 # This checks five declared foreground/background pairs only. It does not
 # establish full-page WCAG AA compliance or keyboard/focus behaviour; do not
-# describe it as a complete audit. Manual keyboard/focus matrix: Tab through
-# each page, toggle opens/closes with Enter/Space, focus ring visible on
-# every link/button (see README "Keterbatasan yang diketahui").
+# describe it as a complete audit. The full-page computed-contrast sweep
+# lives in a11y-review.py; the keyboard matrix lives in keyboard-test.py
+# (real Tab/Enter/Space/Escape input via CDP) and reduced-motion behaviour
+# in reduced-motion-test.py (CDP media emulation).
 python3 - <<'PYEOF'
 def lum(hexs):
     r, g, b = (int(hexs[i:i+2], 16) / 255 for i in (1, 3, 5))
