@@ -280,3 +280,47 @@ PR #4 was NOT merged by this work; PR #5 / PR-014 and PR #2 untouched.
   not done (documented gaps, not blockers invented by this response).
 - PR-014 and the founder decisions listed in the original audit (provider,
   privacy, quota, supply, venue) remain open and are untouched by this work.
+
+## Addendum — 2026-11-09, 13:20 WIB (current state; supersedes the repository snapshot above)
+
+This addendum records a fresh GitHub API/source inspection. The original 03:20 WIB section above remains a historical snapshot and must not be read as the current repository state.
+
+### Repository and pull requests
+
+- Default branch `main`: `4707a74b2871c707646943b22405742271ab3d9e`.
+- PR #4 (`muse/pr-013-site-review-id`): open, IN REVIEW — NOT ACCEPTED; head `870eed4a5de9561f3df758a22ec90aadaee7a39d`; 66 commits ahead / 0 behind `main`; GitHub reports `mergeable=true`, `mergeable_state=clean`.
+- PR #5 (`muse/pr-014-whitelist-adr`): open, DESIGN ONLY; head `e4d997a00ddf2da8cec64fe60225abed92681526`; 12 commits ahead / 10 behind `main`; GitHub reports `mergeable=false`, `mergeable_state=dirty`.
+- PR #2 remains open and draft.
+- Repository is public; GitHub repository metadata reports `has_pages=false`. Repository rulesets endpoint returns an empty list. The branch-protection endpoint returned HTTP 403 to this integration, so branch protection could not be independently verified in this audit.
+- The non-deploy workflow is limited to `contents: read`, uses checkout with `persist-credentials: false`, and pins the referenced actions to commit SHAs. It has no deployment step.
+
+### PR-013 latest verified implementation and tests
+
+- Muse commit `fb7945aaac77d8c954415512c1f394570411aaa9` adds the keyboard-only matrix, reduced-motion browser emulation, broader accessibility review, Escape/focus-return behaviour, and removes repository links from the six page footers.
+- Muse documentation follow-ups include `f78ae2b9480c773beb0e64ac2b62152312f84c5c` and `54552f461f9f8094a0fdabec1a8dbaf47e757701`.
+- Owner-side commit `6bea5dc4a0a9d6b56371dccb4ecfa0666d473297` expands CI; `f6cf05735fced84634fd9e8805aeebaea014a836` replaces DOM `.click()` with CDP mouse input and state polling after an intermittent third-run failure; `870eed4a5de9561f3df758a22ec90aadaee7a39d` updates evidence/backlog documentation.
+- GitHub Actions run [#42567743009](https://github.com/nusasaputrarama-max/Politik-riuh-project/actions/runs/42567743009) completed SUCCESS on the exact PR #4 head `870eed4a5de9561f3df758a22ec90aadaee7a39d`. All 15 job steps completed successfully: static/route/copy/security/heading checks, three independent mobile navigation runs, keyboard-only matrix across six pages, reduced-motion emulation, accessibility review, 12 desktop/mobile screenshots, checksum generation, and artifact upload.
+- Artifact `13651932929`, 2,992,614 bytes, GitHub SHA-256 `f0e4a6981f947ff26b14c8c7727c29591cadfb6ed327485a4282546463c18054`. Independent archive and internal checksum verification (33/33) is recorded in PR #4 comment `6733642680`.
+- The accessibility review found 360 visible text elements with none below the configured contrast thresholds, but approximates text over the decorative hero glow. No screen-reader test or physical-device keyboard test was performed. This is not a WCAG conformance claim.
+- One direct public repository URL remains in `apps/token-site/transparency.html:82`. Footer links were removed, but this body link exposes the personal GitHub handle. Its retention/removal and any move to an organization require the founder's decision; no substitute URL has been invented.
+
+### Documentation corrections in this audit
+
+- The `nav-toggle-test.py` docstring incorrectly described the test as using `Runtime.evaluate` to click. The implementation uses CDP `Input.dispatchMouseEvent`; the docstring is being corrected to match the implementation.
+- The token-site README and backlog referenced older CI runs/heads. They are being updated to identify run #42567743009 and head `870eed4` as the latest exact-head evidence.
+- PR #5 remains blocked: its three shared files differ from PR #4 (`collaboration/MUSE_WHITELIST_HANDOFF.md`, `docs/backlog.md`, `docs/website-audit-2026-11-09.md`). Blob comparisons confirmed the other three shared files are identical. Do not merge PR #5 before updating it from the accepted PR-013 result and reconciling these three files without restoring stale copies.
+
+### PR-014 security position and next work
+
+PR #5 remains an ADR only. The design requires applicant caller-JWT/RLS access, restricts service-role to narrowly scoped server operations, requires server-side AAL2 for privileged operations, treats audit hashes as tamper-evident rather than immutable, and keeps Telegram/Discord checks manual until consent-based identity binding is reviewed. These are design requirements, not implemented controls. No provider, applicant backend, database, live registration, email sender, admin endpoint, or real applicant data exists.
+
+Before PR-014 acceptance, require a role/operation authorization matrix; unauthenticated/AAL1 denial and AAL2 positive tests for every privileged operation; applicant A-vs-B isolation and IDOR tests; proof ordinary applicant routes use caller JWT/RLS and do not expose service keys; audit-log UPDATE/DELETE denial and external signed chain-head anchoring; and first-party provider region/pricing/backup/restore evidence if a provider is proposed.
+
+### Founder decisions still open
+
+- Keep or remove the repository URL in the Transparency page; decide whether a public organization/repository identity is needed.
+- Branch protection and required status checks (not verifiable with current integration permissions).
+- Whitelist provider/region, applicant and admin login, MFA recovery, email sender, privacy notice, retention/deletion, quota and selection policy.
+- Token supply, decimals, allocation, venue, launch date, domain and hosting.
+
+No public deployment, Pages activation, whitelist registration, applicant data collection, wallet connection/signing, minting/distribution, mainnet action, or funds movement was performed.
