@@ -2,7 +2,7 @@
 # POLITIK RIUH — token-site reproducible local checks (PR-013).
 # Zero dependencies beyond python3, curl, node (all already on the machine).
 # Usage:  bash checks.sh            (from apps/token-site/)
-#         bash checks.sh --keep-server  (leave the local server running)
+# Usage: bash checks.sh
 # Exit code 0 = all checks pass. Any failure prints FAIL and exits non-zero.
 # Screenshots are NOT produced here; see screenshots.sh.
 set -u
@@ -73,6 +73,8 @@ for p in pages:
             fails.append(f"{p}: unresolved local link {link!r}")
     if "<form" in text.lower():
         fails.append(f"{p}: contains a <form> (static site must not collect data)")
+    if re.search(r'class=["\'][^"\']*\bwallet-status\b', text) or "Koneksi baca-saja direncanakan" in text:
+        fails.append(f"{p}: wallet-status UI is outside Phase 1 and must be absent")
     if re.search(r"\bfetch\s*\(|XMLHttpRequest|localStorage|sessionStorage", text):
         fails.append(f"{p}: contains fetch/XHR/storage calls")
     if 'lang="en"' in text:
@@ -84,7 +86,7 @@ for name in ("NENGOK", "GORENG", "DER"):
     # DER as a standalone word only; do not flag substrings.
     if re.search(rf"\b{name}\b", all_text):
         fails.append(f"stale candidate name {name} still present in public copy")
-for phrase in ("To be decided", "Not launched", "Skip to content", "Read-only connect planned"):
+for phrase in ("To be decided", "Not launched", "Skip to content", "Read-only connect planned", "Koneksi baca-saja direncanakan"):
     if phrase in all_text:
         fails.append(f"leftover English participant copy: {phrase!r}")
 if "REFORMASI" not in all_text:
@@ -112,7 +114,7 @@ PYEOF
 # --- 4. JS syntax ----------------------------------------------------------
 node --check main.js && pass "node --check main.js" || fail "node --check main.js"
 
-# --- 5. WCAG contrast (computed from the CSS palette) ----------------------
+# --- 5. WCAG contrast spot-check (five declared palette pairs only) --------
 python3 - <<'PYEOF'
 def lum(hexs):
     r, g, b = (int(hexs[i:i+2], 16) / 255 for i in (1, 3, 5))
@@ -139,7 +141,7 @@ for name, fg, bg in pairs:
 import sys
 sys.exit(1 if bad else 0)
 PYEOF
-[ $? -eq 0 ] && pass "contrast: all pairs pass WCAG AA (4.5:1)" || fail "contrast check"
+[ $? -eq 0 ] && pass "contrast: five-pair palette spot-check passes WCAG AA; not a full page audit" || fail "contrast spot-check"
 
 # --- 6. Summary ------------------------------------------------------------
 if [ "$FAIL" = 0 ]; then
