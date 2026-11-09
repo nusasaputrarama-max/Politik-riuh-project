@@ -328,3 +328,39 @@ Before PR-014 acceptance, require a role/operation authorization matrix; unauthe
 - Token supply, decimals, allocation, venue, launch date, domain and hosting.
 
 No public deployment, Pages activation, whitelist registration, applicant data collection, wallet connection/signing, minting/distribution, mainnet action, or funds movement was performed.
+
+
+## Addendum — 2026-11-09, 14:07 WIB (latest independent verification)
+
+This addendum supersedes earlier PR-013 head/run and repository-link status references above. Historical snapshots are retained as historical records.
+
+### Current PR-013 state
+
+- Repository: `nusasaputrarama-max/Politik-riuh-project`.
+- PR #4 branch: `muse/pr-013-site-review-id`.
+- Head: `c3ad0ea789ed0942213e291773e5925bb4cbc20d`; base `main` at `4707a74b2871c707646943b22405742271ab3d9e`.
+- GitHub compare: 82 commits ahead / 0 behind; 47 changed paths; no `apps/web/` path; mergeable/clean.
+- Attribution: Muse's accessibility implementation is `fb7945aaac77d8c954415512c1f394570411aaa9` (author and committer Muse). The current identity/test/README corrections in this cycle are owner-side commits: `de8022b3d8d73b974e543e9aa4758c4a75000bfd` (remove owner-specific URL from Transparency), `2ccb66a5eec700fb527a350f1c0d605118922abf` (enforce anonymous identity across all six public HTML pages), and `c3ad0ea789ed0942213e291773e5925bb4cbc20d` (README synchronization). Do not attribute these owner commits to Muse.
+
+### Latest exact-head CI and independent evidence verification
+
+- GitHub Actions run [#42577861420](https://github.com/nusasaputrarama-max/Politik-riuh-project/actions/runs/42577861420) completed SUCCESS on exact head `c3ad0ea789ed0942213e291773e5925bb4cbc20d`; all 15 job steps succeeded.
+- Job: `129029574578`.
+- Artifact: `13654939987`, 3,000,664 bytes, GitHub SHA-256 `f42e2ea30a09099d41fb2b31bb9f27ffb198040a67a0de6732c6ba27d085d8fa`.
+- The archive was downloaded independently. Local `sha256sum` matched GitHub's digest; `sha256sum -c apps/token-site/CI-SHA256SUMS.txt` passed 33/33 entries.
+- Static checks: 8/8 local routes; 6/6 HTML pages with `lang=id`, one H1 and resolved local links; no owner handle in any public HTML page; no forms, fetch/XHR/storage, wallet signing/transaction or secret patterns; JS syntax passed; five-pair contrast spot-check passed.
+- Browser checks: navigation 3/3; keyboard-only matrix across all six pages; reduced-motion emulation; accessibility review of 360 visible text elements with zero below configured thresholds; 12/12 screenshots (desktop 1280x3000, mobile 390x4500).
+- Visual inspection of the refreshed Transparency mobile capture confirms the owner-specific repository URL is absent and the page remains readable without horizontal overflow.
+
+### Identity correction
+
+The direct `github.com/nusasaputrarama-max/Politik-riuh-project` link was removed from `apps/token-site/transparency.html`, following the established anonymous-team decision. The copy now says that direct links to the operator account are not displayed; no organization or replacement URL was invented. `apps/token-site/checks.sh` now rejects the owner handle anywhere in the six public HTML pages, not only inside footers. The final CI log contains: `PASS: anonymous identity — no owner GitHub handle or direct repository URL in any public page`.
+
+### Remaining limitations and release status
+
+- No NVDA, VoiceOver, or TalkBack screen-reader test; no manual physical-device keyboard pass.
+- The contrast calculation approximates text over the decorative hero glow. No WCAG conformance claim is made.
+- PR #4 remains open and **IN REVIEW — NOT ACCEPTED**; CI success is not merge approval.
+- PR #5 / PR-014 remains design-only and merge-blocked; no applicant backend or whitelist data collection exists.
+- GitHub Pages remains unconfigured in the last verified repository snapshot. No deployment workflow, Pages setting, DNS, or production URL was changed. Public HTTPS remains **NOT VERIFIED**.
+- No change to `apps/web/`; no wallet connection/signing/transaction, token mint, launch, purchase, or funds movement.
