@@ -30,15 +30,15 @@ Three viable architectures. All three keep the public site (`apps/token-site/`) 
 
 | Layer | Implementation |
 |---|---|
-| Backend / API | Supabase Edge Functions (Deno/TypeScript) + PostgREST auto-API, with Row Level Security (RLS) as the authorization layer; all privileged writes go through Edge Functions with the service key server-side only |
+| Backend / API | Supabase Edge Functions (Deno/TypeScript) + PostgREST. Applicant-scoped reads/writes use the caller's JWT and RLS. A service-role/secret key bypasses RLS and MUST NOT be used for the applicant request path; reserve it only for narrowly scoped server operations that independently verify identity, role, applicant scope, and required MFA assurance. |
 | Database | Managed Postgres (Supabase). Tables: applicants, tasks, task_states, evidence (metadata only), decisions, audit_log, admin_config |
 | Applicant login | Supabase Auth, email magic link (passwordless) — no password to store; session JWT, short expiry, refresh rotation |
-| Admin auth | Supabase Auth + a separate admin allowlist table; TOTP MFA enforced in Auth; admin dashboard is a separate app/route that never ships the service key |
+| Admin auth | Supabase Auth + a separate admin allowlist table; TOTP enrolment plus server-side AAL2 enforcement on every privileged Edge Function/API and database operation. Admin dashboard is separate and never ships a service key. AAL1 and unauthenticated requests must be denied. |
 | Email verification | Supabase Auth built-in email (magic link doubles as verification) + a transactional provider (e.g. Resend) via SMTP for status mail; verify sender domain before use |
 | Hosting | Supabase cloud (region selectable, e.g. Singapore for SEA latency); static site stays on GitHub Pages (separate, PR-013) |
 | Secrets | Supabase dashboard secrets + Edge Function secrets; service-role key never in browser code; rotate on admin change |
 | Backups | Free tier: none included — manual `pg_dump` exports. Pro: daily backups + point-in-time recovery (add-on) |
-| Audit log | Append-only `audit_log` table (insert-only RLS policy; no UPDATE/DELETE grants for any role), plus Supabase Auth admin audit events |
+| Audit log | Restricted append path with application roles denied UPDATE/DELETE; do not claim protection from the database owner. Treat the hash chain as tamper-evident and anchor periodic signed chain-head digests outside the database. |
 
 ### Option B — VPS self-hosted: Hetzner VPS + Docker + Postgres
 
@@ -149,28 +149,30 @@ Trust boundaries: (a) browser ↔ API — the browser is untrusted, all state tr
 | Applicant reads another applicant's data (IDOR) | Privacy breach | Applicant isolation: every query scoped to the authenticated applicant id; no predictable public URLs; RLS or equivalent server-side check on every row |
 | Client-side state tampering (unlock tasks, fake VERIFIED) | Bypass of eligibility | Server is authoritative; task transitions validated against prerequisites in the backend; browser state is display-only |
 | Evidence forgery (fake screenshots) | False verification | Screenshots are supporting evidence only; API-verifiable tasks use platform data, not images; manual review checks post URLs/timestamps |
-| Admin credential theft / session hijack | Full applicant data + selection control | MFA required; short sessions; separate admin login; audit log of every privileged action; alerts on new admin sessions (if the provider supports them) |
+| Admin credential theft / session hijack | Full applicant data + selection control | Server-side MFA assurance on every privileged operation (AAL2 for Supabase); short sessions; separate admin login; least privilege; audit log and alerts on new admin sessions where supported |
 | Secret leak (service key, mail key, platform tokens) | Full backend access | Secrets in provider secret store only; never in repo/browser; rotation procedure; least-privilege keys |
 | Email enumeration / spam | Harassment, phishing surface | Generic responses ("if this email is registered, a link was sent"); rate limits on verification sends; SPF/DKIM/DMARC |
 | Platform API key abuse / quota burn | Cost, verification outage | Server-side keys only; per-applicant verification budget; verification jobs queued and capped (§8) |
 | Data breach / ransomware on the host | Applicant PII exposure | Encryption at rest (provider default), encryption in transit (TLS), least-privilege access, backups kept off the same host, deletion workflow |
-| Insider / rogue admin | Silent selection manipulation | Append-only audit log; quota/selection changes need a recorded reason; exports logged; two-person review for the final selection list (process rule, not code) |
+| Insider / rogue admin | Silent selection manipulation | Restricted append-only application path; external signed chain-head anchors; quota/selection changes require a reason; exports logged; two-person review for the final selection list (process rule, not code). Database-owner compromise remains a residual risk. |
 
-## 5. Cost at current scale (snapshot 2026-11-09 — verify before deciding)
+## 5. Cost model and evidence quality (not decision-grade)
 
-Assumptions: ~1,000 applicants, ~5 tasks each, ~3 emails per applicant (verification + 2 status mails), evidence screenshots ~200 KB each, ≤3 per applicant. All prices below are **snapshots from secondary summaries of vendor pricing pages, read 2026-11-09** — re-check the vendor's own pricing page before any purchase.
+The scenario of ~1,000 applicants, ~5 tasks each, ~3 emails per applicant, and up to three ~200 KB evidence images per applicant is a planning assumption only, not a measured forecast.
 
-| Item | Option A — Supabase | Option B — VPS | Option C — Workers + D1 |
+The numeric estimates in the previous draft were assembled from secondary summaries and are **not suitable for provider selection, procurement, or budget approval**. They are removed from this ADR rather than repeated as verified prices. No provider or plan is selected here.
+
+| Cost area | Supabase | Hetzner VPS | Cloudflare Workers + D1/R2 |
 |---|---|---|---|
-| Hosting / compute at $0 | Free tier $0 (500 MB DB, 50k MAU, 1 GB storage, 5 GB egress, 500k function calls/mo) — **pauses after 1 week idle; no backups** | VPS ~€4–6/mo (Hetzner CX22 class, 2 vCPU/4 GB; prices rose twice in 2026 and CX stock was reported unavailable in Nov 2026 — verify availability) | Free tier $0 (100k req/day, D1 5M rows read/day, R2 10 GB-month) |
-| Realistic production cost | **Pro $25/mo** (removes pause, 8 GB DB, 100 GB storage, daily backups) + compute overages | ~€5/mo VPS + ~€1/mo snapshot/backup + domain ~$10–15/yr | **Paid $5/mo min** (10M req/mo) once daily caps are a risk; R2/D1 overages small at this scale |
-| Email (~3,000 mails/round) | Auth emails included in MAU allowance; bulk/status mail via Resend-type provider free tier (verify current limits at decision time) | Same transactional provider as A | Same transactional provider as A |
-| X API verification (§8) | **Not free.** Pay-per-use since 6 Feb 2026: ~$0.005 per post read, ~$0.010 per profile read. One full verification pass over 1,000 applicants × ~3 X tasks ≈ **$15–45 in reads** (estimate; excludes OAuth app review time). Budget separately; default is manual review. | Same as A | Same as A |
-| Telegram / Discord verification | $0 (Bot API / gateway, free) | $0 | $0 |
-| Domain + TLS | ~$10–15/yr domain; TLS free (Let's Encrypt / provider) | Same | Same |
-| **Total, first round (excl. X API)** | **$0 prototype / ~$25/mo production** | **~€6/mo + ops time** | **$0 prototype / ~$5/mo production** |
+| Compute / base plan | Verify current plan, project region, compute limits, and overages | Verify the exact SKU available in the chosen datacenter; do not apply an EU CX price to Singapore | Verify Workers request and CPU limits, included usage, and overages |
+| Data / storage | Separate database disk from object storage; verify egress and backup/PITR charges | Include disk, snapshots, off-site backup storage, traffic, IPv4, and tax | Itemize D1 reads, writes and storage separately from R2 storage, operations and egress |
+| Operations | Include backup retention, restore requirements, monitoring and support | Include patching, monitoring, incident response and restore labour | Include export/restore automation, observability and quota monitoring |
+| Email / identity | Price transactional email and sender-domain setup separately | Same | Same |
+| Optional platform verification | X API is excluded unless separately approved and priced from current first-party terms | Same | Same |
 
-Notes: the $0 tiers are all usable for a **staging prototype with dummy data**; none of them is acceptable for real applicant data without the paid step that adds backups and removes pausing/quotas (A: Pro; B: backup add-on; C: Paid + scheduled D1 export). Ops time is the real cost of Option B: patching, monitoring, and incident response fall on a solo anonymous team.
+**Cost evidence gate:** before a provider decision, attach dated links or captures from each vendor's own pricing and region documentation; state region, SKU/plan, workload units, included quota, overage rates, backup/restore costs, taxes, and one-time costs. Recalculate using the selected workload. Do not treat free-tier availability as proof that a service is suitable for real applicant PII; backups, restore testing, support, pause behaviour, and quota exhaustion must be assessed explicitly.
+
+No purchase, subscription, domain registration, or provider provisioning is authorized by this ADR.
 
 ## 6. Residency, privacy, abuse control, recovery, lock-in
 
@@ -184,59 +186,58 @@ Notes: the $0 tiers are all usable for a **staging prototype with dummy data**; 
 
 These are requirements, not suggestions. Implementation must demonstrate each one in review before registration opens.
 
-- **Admin MFA.** TOTP (authenticator app) required for every admin account; no admin login without a second factor; enrolment and recovery codes handled by the founder, never stored in the repo.
-- **RBAC.** At minimum two roles: `admin` (task/quota/config, approve/reject) and `reviewer` (evidence review only, no quota/config, no export). The service-role key is never held by a reviewer. Permissions are checked server-side on every request, not in the UI.
+- **Admin MFA and assurance.** Every admin/reviewer account must enrol a second factor. For Supabase, require AAL2 server-side on every privileged Edge Function/API and on database operations; checking that a TOTP factor is merely enrolled is insufficient. Deny unauthenticated and AAL1 requests. Add tests proving AAL1 is denied and AAL2 is allowed for each privileged operation.
+- **RBAC.** At minimum two roles: `admin` (task/quota/config, approve/reject) and `reviewer` (evidence review only, no quota/config, no export). Permissions are checked server-side on every request, not in the UI.
+- **Supabase caller-JWT / service-role boundary.** Applicant-scoped reads and writes use the caller's JWT so RLS evaluates the applicant identity. Never route ordinary applicant requests through a service-role client. A service-role/secret key bypasses RLS; use it only in narrowly scoped server-side operations where unavoidable. Before any such operation, independently validate the caller token, role, applicant scope, requested action, and AAL2 where privileged. Never trust a client-supplied applicant ID as authorization. Keep the key in server-side secret storage only. For other providers, implement and test the equivalent least-privilege boundary.
 - **Applicant isolation.** Every applicant query is scoped to the authenticated applicant id. No sequential public ids; use random UUIDs. No applicant data in URLs, logs, or error messages.
-- **Retention / deletion.** Retention period is a **founder decision** (propose: delete non-approved applicant records 90 days after the round closes; keep the anonymized selection record permanently). Deletion must remove the applicant row, evidence files, and auth identity, and be recorded in the audit log as "applicant deleted" without copying the PII into the log. A contact address for deletion requests must exist before registration opens.
+- **Retention / deletion.** Retention period is a **founder decision** (propose: delete non-approved applicant records 90 days after the round closes; keep the anonymized selection record permanently). Deletion must remove the applicant row, evidence files, and auth identity, and be recorded in the audit log as "applicant deleted" without copying PII into the log. A contact address for deletion requests must exist before registration opens.
 - **Evidence privacy.** Evidence is stored as private objects with signed, short-lived URLs; metadata (not file contents) in the DB; access logged; reviewers see evidence only for applicants assigned to them.
 - **Rate limits.** Registration 5/hour/IP + 3/day/email; verification sends 3/hour/email; evidence uploads 10/hour/applicant; login attempts 5/15 min; admin login 5/15 min + lockout alert. Limits are enforced server-side and return generic errors.
-- **Append-only audit record.** `audit_log` accepts INSERT only (no UPDATE/DELETE grants for any application role). Each record: timestamp, actor (admin id or `system`), action, target id, reason/category, and a hash of the previous record (hash chain) so tampering is detectable. Personal data is never copied into audit records.
+- **Audit-log integrity.** Application roles cannot UPDATE or DELETE audit records. Writes go through a narrowly scoped append function/role that validates actor, action, target, and reason; no PII is copied into the log. A hash chain is **tamper-evident, not immutable against a database owner**. Periodically anchor a signed chain-head digest in an independent system outside the applicant database, with access and retention documented. Test that ordinary application/admin roles cannot rewrite or delete records.
 - **Secrets.** Provider secret store only; separate secrets per environment (staging vs production); rotation on any admin change or suspected leak; no secrets in Git, chat, or the static site.
 - **Input handling.** Parameterized queries everywhere; strict validation of email, base58 Solana address (decode to 32 bytes, reject `0x` EVM addresses), and X handle format; URL allowlisting for task targets; HTML-escaping of all untrusted text.
 
 ## 8. Verification capability matrix (X / Telegram / Discord)
 
-Status key: **API** = verifiable by a platform API the project can actually use · **MANUAL** = human review of submitted evidence · **SELF** = applicant self-attestation only (never counts as VERIFIED).
+Status key: **API** = verifiable by a platform API after an approved identity-linking flow · **MANUAL** = human review of submitted evidence · **SELF** = applicant self-attestation only (never counts as VERIFIED).
 
 | Task | X | Telegram | Discord |
 |---|---|---|---|
-| Follow official account | **MANUAL** (default). **API only if** the applicant authorizes the project app via OAuth (user context) **and** the project funds pay-per-use reads (~$0.005–0.010 per check, §5). Without both, a follow cannot be verified — do not label it VERIFIED. | n/a | n/a |
-| Like a designated post | **MANUAL** (default). Same OAuth + paid-read conditions as follow; likes are user-context data and are not publicly listable. | n/a | n/a |
-| Repost / quote a designated post | **MANUAL** (default). **API only if** the applicant submits their post URL and the API can fetch that post (paid read) and match it to the campaign target; quote-post text matching still needs review. | n/a | n/a |
-| Join official group / channel | n/a | **API** — Bot API `getChatMember` confirms membership, free. Requires the project bot to be an admin of the group/channel. (Joining via invite link alone, without a bot check, is SELF.) | n/a |
-| Join official server | n/a | n/a | **API** — bot with the privileged `GUILD_MEMBERS` intent can confirm membership, free. Requires the bot in the server with the intent enabled. |
+| Follow official account | **MANUAL** by default. API verification is out of scope until applicant OAuth consent, minimum scopes, current first-party API capability/pricing, and a funded budget are separately approved. | n/a | n/a |
+| Like a designated post | **MANUAL**. Do not infer a like from a screenshot or applicant click. API verification requires the same OAuth, capability, and budget gates as follow. | n/a | n/a |
+| Repost / quote a designated post | **MANUAL**. A submitted post URL can support manual review; automated verification requires current API capability and separate approval. | n/a | n/a |
+| Join official group / channel | n/a | **MANUAL until identity binding is designed and approved.** Future API verification would require a consent-based, single-use bot deep link that binds the applicant to the Telegram user ID, plus a bot with the required group/channel permissions. `getChatMember` alone does not prove which applicant owns a Telegram account. | n/a |
+| Join official server | n/a | n/a | **MANUAL until identity binding is designed and approved.** Future API verification would require a state/CSRF-protected OAuth2 account-link flow with minimum scopes, verified callback, and a stored Discord user ID bound to the applicant. The `GUILD_MEMBERS` intent alone does not establish applicant identity. |
 | Submit a post / meme / creative task | **MANUAL** — reviewer checks the submitted link/content against the task brief. | **MANUAL** | **MANUAL** |
 | Email ownership | **API** (own system) — magic-link verification. | — | — |
 | Solana address validity | **API** (own system) — base58 decode to 32 bytes. Ownership is **not** verified (no signature is requested by design). | — | — |
 
 Rules that follow from the matrix:
 
-- The **default verification mode for every X follow/like/repost task is MANUAL** (or SELF where the spec allows it). API verification for X is an opt-in upgrade that needs two founder decisions: funding pay-per-use X credits, and requiring applicants to OAuth-authorize the project app.
-- Never display VERIFIED for a like/follow/repost merely because the applicant clicked a button or uploaded a screenshot. A screenshot is evidence for manual review, not verification.
-- Each task stores its verification mode, method, timestamp, result, and evidence reference. If a platform changes its API or pricing, the affected tasks fall back to MANUAL — they do not silently become SELF.
+- X follow/like/repost, Telegram membership, and Discord membership remain **MANUAL** until their identity-binding, platform permissions, API capability, privacy impact, and cost have been reviewed and separately approved.
+- Never display VERIFIED merely because an applicant clicked a button or uploaded a screenshot. A screenshot is evidence for manual review, not verification.
+- Each task stores its verification mode, method, timestamp, result, and evidence reference. If a platform changes its API or pricing, the affected task remains MANUAL until re-reviewed; it does not silently become SELF or VERIFIED.
 
 ## 9. Recommendation
 
-**Recommended: Option A — Supabase (managed BaaS), on the Pro plan before any real applicant data is collected.**
+**No provider is selected by this ADR.** Option A (Supabase) may remain a provisional architecture candidate because managed Postgres and Auth can reduce the amount of custom authentication and operations code for a small team. This is not procurement approval, budget approval, or permission to create a project.
 
-Rationale:
+The earlier numeric cost comparison is not decision-grade and must not be used to claim that one option is cheapest. Before choosing, compare first-party, region-specific pricing and operational requirements using the evidence gate in §5.
 
-1. **Smallest ops surface for a solo anonymous team.** Auth (magic links, MFA, sessions), Postgres, RLS, Storage, and Edge Functions are one product with one dashboard. Options B and C require hand-built auth and backup plumbing — the two components most likely to be implemented insecurely under time pressure.
-2. **Applicant login and admin MFA are built-in, not invented.** Supabase Auth is the only option where magic-link login, TOTP enforcement, and session handling do not depend on our code being correct.
-3. **Lowest lock-in among managed options.** The data is plain Postgres; a `pg_dump` restores anywhere, so the project can leave Supabase without a rewrite.
-4. **Cost fits the scale.** $0 for a dummy-data staging prototype; $25/mo Pro for production, which also buys the daily backups and removes the free-tier pause that would otherwise take registration offline after a week of inactivity.
-5. **Weaknesses are known and mitigable:** the free tier must never hold real data (pause + no backups); RLS policies must be reviewed line-by-line before launch (an RLS mistake is a data leak); Auth user export is the awkward part of an exit.
+If Rama chooses Option A, the caller-JWT/RLS and service-role separation plus server-side AAL2 controls in §7 are mandatory. If Rama chooses Option B or C, equivalent server-side authorization, MFA assurance, least privilege, audit integrity, backup/restore and applicant-isolation controls remain mandatory; they do not become optional because the provider differs.
 
-**Not recommended as first choice:** Option B (cheapest sticker price, but the ops and security burden lands entirely on the team, including auth, patching, and incident response); Option C (good free tier and $5/mo production, but applicant auth and D1 backup/restore must be built by hand, and data-residency control is weakest).
-
-**This recommendation does not select a provider.** Rama still decides: provider (A, B, or C), region, email sender, retention period, and whether to fund X API verification. If Rama prefers B or C, the enforcement spec (§7) and matrix (§8) still apply unchanged.
+The decision remains with Rama: provider, region, email sender, retention period, and whether to fund any platform API verification.
 
 ## 10. Security review checklist (before registration opens)
 
-- [ ] RLS / authorization policies reviewed line-by-line; negative tests prove applicant A cannot read applicant B (all options: equivalent server-side checks).
-- [ ] No service-role / admin key in any browser bundle, static file, or repo.
-- [ ] Admin MFA enforced; reviewer role cannot change quota, config, or export.
-- [ ] Audit log is append-only in practice (attempted UPDATE/DELETE fails in staging).
+- [ ] Applicant A cannot read or modify applicant B's records; negative tests cover every applicant-facing read/write path.
+- [ ] Supabase applicant requests use caller JWT/RLS; service-role is absent from browser bundles and never used for ordinary applicant-scoped requests.
+- [ ] Every privileged admin/reviewer API and database operation enforces server-side AAL2; tests prove AAL1 is denied and AAL2 is allowed.
+- [ ] Reviewer role cannot change quota, config, or export; authorization is tested server-side, not only in UI.
+- [ ] Audit append path is restricted; application roles cannot UPDATE/DELETE records; external signed chain-head anchoring is tested and documented. Do not claim protection from database-owner compromise.
+- [ ] Telegram and Discord tasks remain MANUAL unless approved identity-linking flows are implemented and security-tested.
+- [ ] X API verification remains opt-in and disabled until current first-party pricing/capability evidence and funding approval exist.
+- [ ] Provider/region/plan cost worksheet uses dated first-party sources and itemizes database, object storage, egress, backups, compute, email, operations, and overages.
 - [ ] Rate limits tested (registration, verification, upload, login).
 - [ ] Duplicate detection tested on normalized email/handle/wallet.
 - [ ] Email verification required before tasks unlock; magic links single-use + expiring.
@@ -246,7 +247,7 @@ Rationale:
 - [ ] Official X/Telegram/Discord accounts and exact campaign tasks confirmed by Rama.
 - [ ] Quota and selection policy set by an admin in the system (not hardcoded); draw procedure (if any) published.
 - [ ] Rollback/shutdown procedure rehearsed: freeze registrations → export decision record → delete per retention policy.
-- [ ] ChatGPT security review of this record completed; findings tracked, not just commented.
+- [ ] ChatGPT security review of the revised ADR completed; findings tracked, not just commented.
 
 ## 11. What is NOT built in this PR
 
@@ -268,11 +269,17 @@ Rationale:
 9. Privacy notice and consent wording.
 10. Final token supply, decimals, allocations, launch venue/date, and domain (separate token decisions, not this ADR).
 
-## 13. Sources (checked 2026-11-09)
+## 13. Sources (official references; re-check before selection or implementation)
 
 - `docs/whitelist-spec.md` v0.1 — requirements baseline (owner-approved, issue #1).
-- Supabase free/pro limits: secondary summaries of Supabase's pricing page/docs, checked Sep–Oct 2026 (free: 500 MB DB, 50,000 MAU, 1 GB storage, 5 GB egress, 500k function calls/mo, pause after 1 week idle, no backups; Pro from $25/mo, 8 GB DB, daily backups). Re-check https://supabase.com/pricing before deciding.
-- Cloudflare Workers/D1/R2 free limits: secondary summaries of Cloudflare's pricing/limits docs, checked Oct–Nov 2026 (Workers 100k req/day, 10 ms CPU; D1 5M rows read/day, 100k written/day, 5 GB; R2 10 GB-month; Paid $5/mo min). Re-check https://developers.cloudflare.com/workers/platform/pricing/ before deciding.
-- Hetzner CX22 pricing: secondary summaries, Nov 2026 (~€3.79–5.49/mo, 2 vCPU/4 GB/40 GB NVMe; prices rose twice in 2026 and CX availability was reported limited). Re-check https://www.hetzner.com/cloud before deciding.
-- X API pricing: secondary summaries of X's pricing page/changelog, Sep–Oct 2026 (pay-per-use since 6 Feb 2026; ~$0.005 per post read, ~$0.010 per profile read, $0.015 per post, $0.20 per post with a link; no free tier for new developers; legacy Basic $200/mo deprecated). Re-check the X developer pricing page before budgeting verification.
-- Telegram Bot API `getChatMember` and Discord `GUILD_MEMBERS` intent: platform capabilities as documented in their respective developer docs (not re-read in this check — confirm against the official docs during implementation review).
+- Supabase API keys and RLS boundary: https://supabase.com/docs/guides/getting-started/api-keys
+- Supabase Edge Function authentication and caller context: https://supabase.com/docs/guides/functions/auth
+- Supabase MFA and assurance levels: https://supabase.com/docs/guides/auth/auth-mfa and https://supabase.com/docs/reference/javascript/auth-mfa-getauthenticatorassurancelevel
+- Supabase pricing, database disk, object storage, egress and backups: https://supabase.com/pricing, https://supabase.com/docs/guides/platform/manage-your-usage/disk-size, https://supabase.com/docs/guides/platform/manage-your-usage/storage-size, https://supabase.com/docs/guides/platform/manage-your-usage/egress, https://supabase.com/docs/guides/platform/backups
+- Cloudflare Workers, D1 and R2 pricing: https://developers.cloudflare.com/workers/platform/pricing/, https://developers.cloudflare.com/d1/platform/pricing/, https://developers.cloudflare.com/r2/pricing/
+- Hetzner Cloud regions and pricing: https://www.hetzner.com/cloud/ and https://www.hetzner.com/cloud-singapore/
+- X developer platform pricing and API capability: https://developer.x.com/en/products/x-api
+- Telegram Bot API: https://core.telegram.org/bots/api
+- Discord OAuth2 and privileged intents: https://discord.com/developers/docs/topics/oauth2 and https://support-dev.discord.com/hc/en-us/articles/6207308062871-What-are-Privileged-Intents
+
+Pricing, availability, regional residency, API scopes and platform capabilities are time-sensitive. The links above are research starting points, not evidence that any provider, plan, integration, or price has been selected or approved. Capture current first-party evidence on the date of the founder's decision.
