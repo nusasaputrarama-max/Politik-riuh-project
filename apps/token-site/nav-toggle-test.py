@@ -25,6 +25,8 @@ def listener_pid(port):
 CHROME = os.environ.get("CHROME", os.path.expanduser("~/chrome-extract/opt/google/chrome/chrome"))
 HTTP_PORT = free_port()
 CDP_PORT = free_port()
+while CDP_PORT == HTTP_PORT:
+    CDP_PORT = free_port()
 URL = sys.argv[1] if len(sys.argv) > 1 else f"http://127.0.0.1:{HTTP_PORT}/index.html"
 
 _WS_LEFTOVER = {}
@@ -106,16 +108,18 @@ def cdp(s, mid, method, params=None):
             if "error" in msg: raise RuntimeError(msg["error"])
             return msg.get("result", {})
 
-server = subprocess.Popen([sys.executable, "-m", "http.server", str(HTTP_PORT), "--bind", "127.0.0.1"],
-                          cwd=os.getcwd(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 # Unique profile dir per run: a stale/shared default profile can make a
 # second Chrome instance attach to (or block on) another process.
 PROFILE_DIR = tempfile.mkdtemp(prefix="token-site-chrome-")
-chrome = subprocess.Popen([CHROME, "--headless=new", "--disable-gpu", "--no-sandbox",
-                           f"--user-data-dir={PROFILE_DIR}",
-                           f"--remote-debugging-port={CDP_PORT}", "--window-size=390,844", URL],
-                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+server = None
+chrome = None
 try:
+    server = subprocess.Popen([sys.executable, "-m", "http.server", str(HTTP_PORT), "--bind", "127.0.0.1"],
+                              cwd=os.getcwd(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    chrome = subprocess.Popen([CHROME, "--headless=new", "--disable-gpu", "--no-sandbox",
+                               f"--user-data-dir={PROFILE_DIR}",
+                               f"--remote-debugging-port={CDP_PORT}", "--window-size=390,844", URL],
+                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Readiness polling with timeout (15 s) + content check: the server must
     # answer with OUR page, not just any HTTP 200 on a colliding port.
     ready = False
@@ -151,22 +155,33 @@ try:
         time.sleep(0.5)
     expr = ("(()=>{const t=document.querySelector('[data-nav-toggle]');"
             "const n=document.getElementById('site-nav');"
+            "if(!t||!n)return 'FAIL:missing nav controls';"
+            "const initial=t.getAttribute('aria-expanded')==='false'&&t.getAttribute('aria-controls')==='site-nav'&&t.textContent==='Menu';"
             "t.click();"
-            "return 'NAV-OPEN='+n.classList.contains('is-open')"
-            " + ' ARIA='+t.getAttribute('aria-expanded')"
-            " + ' LABEL='+t.textContent;})()")
+            "const opened=n.classList.contains('is-open')&&t.getAttribute('aria-expanded')==='true'&&t.textContent==='Tutup menu';"
+            "t.click();"
+            "const closed=!n.classList.contains('is-open')&&t.getAttribute('aria-expanded')==='false'&&t.textContent==='Menu';"
+            "return 'INITIAL='+initial+' OPEN='+opened+' CLOSED='+closed;})()")
     r = cdp(s, 2, "Runtime.evaluate", {"expression": expr, "returnByValue": True})
     if "exceptionDetails" in r:
         print("FAIL: evaluate exception:", json.dumps(r["exceptionDetails"])[:500]); sys.exit(1)
     out = r["result"]["value"]
     print(out)
-    ok = out == "NAV-OPEN=true ARIA=true LABEL=Tutup menu"
-    print("PASS: nav toggle opens, aria-expanded=true, label=Tutup menu" if ok else "FAIL: unexpected toggle state")
+    ok = out == "INITIAL=true OPEN=true CLOSED=true"
+    print("PASS: nav toggle initial/open/close states and ARIA labels are correct" if ok else "FAIL: unexpected toggle state")
     sys.exit(0 if ok else 1)
 finally:
-    chrome.terminate(); server.terminate()
-    try:
-        chrome.wait(timeout=10); server.wait(timeout=10)
-    except subprocess.TimeoutExpired:
-        chrome.kill(); server.kill()
+    for proc in (chrome, server):
+        if proc is not None and proc.poll() is None:
+            try:
+                proc.terminate()
+            except ProcessLookupError:
+                pass
+    for proc in (chrome, server):
+        if proc is not None:
+            try:
+                proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait(timeout=5)
     shutil.rmtree(PROFILE_DIR, ignore_errors=True)

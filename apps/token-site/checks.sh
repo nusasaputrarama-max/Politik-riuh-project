@@ -85,11 +85,12 @@ fails = []
 class P(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
-        self.h1 = 0; self.ids = []; self.landmarks = set()
+        self.h1 = 0; self.headings = []; self.ids = []; self.landmarks = set()
         self.links = []; self.lang = None; self.in_html = False
     def handle_starttag(self, tag, attrs):
         d = dict(attrs)
         if tag == "html": self.lang = d.get("lang")
+        if tag in ("h1", "h2", "h3", "h4", "h5", "h6"): self.headings.append(int(tag[1]))
         if tag == "h1": self.h1 += 1
         if tag in ("header", "nav", "main", "footer"): self.landmarks.add(tag)
         if "id" in d: self.ids.append(d["id"])
@@ -103,6 +104,11 @@ for p in pages:
         fails.append(f"{p}: <html lang> is {parser.lang!r}, expected 'id'")
     if parser.h1 != 1:
         fails.append(f"{p}: {parser.h1} <h1> elements, expected exactly 1")
+    previous_heading = 0
+    for level in parser.headings:
+        if previous_heading and level > previous_heading + 1:
+            fails.append(f"{p}: heading level jumps from h{previous_heading} to h{level}")
+        previous_heading = level
     if parser.landmarks != {"header", "nav", "main", "footer"}:
         fails.append(f"{p}: landmarks {sorted(parser.landmarks)}, expected header/nav/main/footer")
     dup = {i for i in parser.ids if parser.ids.count(i) > 1}

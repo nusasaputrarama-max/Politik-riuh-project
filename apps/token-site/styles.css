@@ -351,7 +351,7 @@ table.facts {
   margin-top: 2px;
 }
 .step-body h3,
-.milestone-body h3 { margin: 0 0 4px; font-size: 17px; }
+.milestone-body h2 { margin: 0 0 4px; font-size: 17px; }
 .step-body p,
 .milestone-body p { margin: 0; color: var(--muted); font-size: 15px; }
 .step-body .pill,
