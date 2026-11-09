@@ -81,8 +81,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p evidence
-          find evidence -maxdepth 1 -type f \( -name '*.png' -o -name 'ci-*.log' \) -print0 | sort -z | xargs -0 -r sha256sum > evidence/CI-SHA256SUMS.txt
-          sha256sum checks.sh screenshots.sh nav-toggle-test.py >> evidence/CI-SHA256SUMS.txt
+          find evidence -maxdepth 1 -type f \( -name '*.png' -o -name 'ci-*.log' \) -print0 | sort -z | xargs -0 -r sha256sum > CI-SHA256SUMS.txt
+          sha256sum checks.sh screenshots.sh nav-toggle-test.py >> CI-SHA256SUMS.txt
 
       - name: Upload CI evidence (screenshots, logs, SHA-256)
         if: always()
@@ -92,7 +92,9 @@ jobs:
           path: |
             apps/token-site/evidence/*.png
             apps/token-site/evidence/ci-*.log
-            apps/token-site/evidence/CI-SHA256SUMS.txt
-            apps/token-site/evidence/SHA256SUMS.txt
+            apps/token-site/CI-SHA256SUMS.txt
+            apps/token-site/checks.sh
+            apps/token-site/screenshots.sh
+            apps/token-site/nav-toggle-test.py
           if-no-files-found: warn
           retention-days: 14
