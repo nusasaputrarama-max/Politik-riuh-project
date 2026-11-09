@@ -24,11 +24,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # actions/checkout v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # actions/checkout v6.0.0
 
       - name: Install Chrome
         id: chrome
-        uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # v1.7.3
+        uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
         with:
           chrome-version: stable
           install-dependencies: true
@@ -48,20 +48,51 @@ jobs:
           command -v ss
           echo "Chrome: $CHROME_VERSION"
 
-      - name: Static, route, copy, security-pattern and contrast checks
+      - name: Static, route, copy, security-pattern, heading and contrast checks
         working-directory: apps/token-site
-        run: bash checks.sh
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          bash checks.sh 2>&1 | tee evidence/ci-checks.log
 
       - name: Mobile navigation test (three independent runs)
         working-directory: apps/token-site
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p evidence
           for attempt in 1 2 3; do
             echo "NAV-TOGGLE RUN ${attempt}/3"
-            python3 nav-toggle-test.py
+            python3 nav-toggle-test.py 2>&1 | tee "evidence/ci-nav-${attempt}.log"
           done
 
       - name: Refresh and validate desktop/mobile screenshots
         working-directory: apps/token-site
-        run: bash screenshots.sh
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash screenshots.sh 2>&1 | tee evidence/ci-screenshots.log
+
+      - name: Generate evidence checksums
+        if: always()
+        working-directory: apps/token-site
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          find evidence -maxdepth 1 -type f \\( -name '*.png' -o -name 'ci-*.log' \\) -print0 | sort -z | xargs -0 -r sha256sum > evidence/CI-SHA256SUMS.txt
+          sha256sum checks.sh screenshots.sh nav-toggle-test.py >> evidence/CI-SHA256SUMS.txt
+
+      - name: Upload CI evidence (screenshots, logs, SHA-256)
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # actions/upload-artifact v6.0.0
+        with:
+          name: token-site-evidence-${{ github.run_id }}
+          path: |
+            apps/token-site/evidence/*.png
+            apps/token-site/evidence/ci-*.log
+            apps/token-site/evidence/CI-SHA256SUMS.txt
+            apps/token-site/evidence/SHA256SUMS.txt
+          if-no-files-found: warn
+          retention-days: 14
