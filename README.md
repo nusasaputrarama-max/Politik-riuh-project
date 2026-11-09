@@ -16,13 +16,9 @@
 4. One Solana-based meme token.
 5. Public transparency dashboard.
 
-## Team
+## Governance
 
-| Role | Who | Responsibility |
-|---|---|---|
-| Founder, final decision-maker | Rama | Product direction, final calls, editorial policy approval |
-| Product architect, tech lead, independent auditor | ChatGPT | Architecture review, technical leadership, independent audit |
-| Engineering partner | Muse | Implementation, testing, technical documentation |
+The project team is anonymous. The founder retains final decision authority; individual identities are not published in public-facing project materials. Product, editorial, and technical decisions are recorded in GitHub.
 
 ## Rules (standing)
 
@@ -58,7 +54,7 @@
 │   ├── website-audit-2026-11-09.md # Current audit and next work order
 │   └── editorial-policy.md # Editorial policy draft v0.1
 └── collaboration/
-    └── MUSE_HANDOFF.md     # Engineering handoff → ChatGPT / Rama review
+    └── MUSE_HANDOFF.md     # Engineering handoff → technical and founder review
 ```
 
 ## Docs to read first

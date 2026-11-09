@@ -54,7 +54,7 @@ python3 nav-toggle-test.py  # exit 0 = toggle navigasi berfungsi
 | Disiplin salinan | Tanpa nama kandidat lama (NENGOK/GORENG/DER); tanpa sisa salinan Inggris yang menghadap peserta; identitas REFORMASI ada; status "Belum diluncurkan" ada; `launch.html` menyatakan whitelist belum dibuka |
 | Form / fetch / storage / dompet | **Tidak ada**: tanpa `<form>`, `fetch()`/XHR, `localStorage`, kode wallet/signing, atau pola secret di source situs |
 | Sintaks JS | `node --check main.js` — lolos |
-| Kontras (rasio WCAG yang dihitung) | Teks redup di bg **7,07:1**; headline **18,96:1**; aksen merah di bg **5,06:1**; tombol utama putih di `#C93338` **5,23:1**; hover **5,79:1** — semuanya lolos AA untuk teks normal (4,5:1) |
+| Kontras (spot-check lima pasangan palet) | Teks redup di bg **7,07:1**; headline **18,96:1**; aksen merah di bg **5,06:1**; tombol utama putih di `#C93338` **5,23:1**; hover **5,79:1** — lima pasangan yang diuji lolos AA untuk teks normal (4,5:1); ini bukan audit semua kombinasi warna halaman |
 | Uji fungsional nav toggle (headless Chrome via CDP, lebar 390px) | `NAV-OPEN=true ARIA=true LABEL=Tutup menu` — lolos |
 | Screenshot (headless Chrome 157) | `evidence/landing-desktop.png` (1280×2600 full page), `evidence/landing-mobile.png` (390×3800 full page), `evidence/{about,token,launch,transparency,roadmap}-desktop.png` (1280×1000 viewport) — dicek visual: landing desktop + mobile, token, launch, roadmap tampil benar |
 
@@ -73,7 +73,7 @@ python3 nav-toggle-test.py  # exit 0 = toggle navigasi berfungsi
 
 - **Suplai ditampilkan sebagai "Diusulkan — menunggu persetujuan founder" TANPA angka.** Dua usulan yang bertentangan masih ada: `docs/token-design.md` merancang 1.000.000.000 sementara `docs/website-launch-spec.md` §10 mencatat 10.000.000.000 sebagai usulan. Konflik itu (D-05a) adalah keputusan founder yang masih terbuka; situs tidak menyelesaikannya.
 - **Nama token REFORMASI sudah disetujui founder; simbol yang diusulkan REFORMASI** menunggu pemeriksaan kompatibilitas teknis — situs tidak menyatakan simbol itu kompatibel. Tidak ada alamat kontrak/mint, tanggal peluncuran, jumlah holder, volume, harga, atau metrik reward di mana pun di situs — semuanya belum ada.
-- Status peluncuran adalah "Belum diluncurkan" / "Mainnet belum diluncurkan", tanpa hitung mundur. Gate mainnet 01 (konsep disetujui) ditandai Selesai karena nama REFORMASI disetujui; gate 02–05 masih Menunggu.
+- Status peluncuran adalah "Belum diluncurkan" / "Mainnet belum diluncurkan", tanpa hitung mundur. Gate mainnet 01 (nama token REFORMASI disetujui) ditandai Selesai; parameter token lainnya tetap belum diputuskan dan gate 02–05 masih Menunggu.
 - **Whitelist adalah alur pendaftaran dan peninjauan GRATIS, bukan penjualan whitelist atau alokasi yang dijamin — dan pendaftaran belum dibuka.** Belum ada backend, basis data, atau deployment yang disetujui; situs statis ini tidak mengumpulkan data pendaftar.
 - Tanpa counter palsu, waitlist, CTA mati, atau tautan placeholder yang disajikan sebagai fungsional.
 
