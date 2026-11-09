@@ -4,12 +4,14 @@ on:
   pull_request:
     paths:
       - "apps/token-site/**"
+      - "docs/accessibility-review-2026-11-09.md"
       - ".github/workflows/token-site-pr.yml"
   push:
     branches:
       - main
     paths:
       - "apps/token-site/**"
+      - "docs/accessibility-review-2026-11-09.md"
       - ".github/workflows/token-site-pr.yml"
 
 permissions:
@@ -21,28 +23,41 @@ concurrency:
 
 jobs:
   validate:
-    name: Static, browser and screenshot validation
+    name: Static, browser, keyboard, motion and accessibility validation
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # actions/checkout v6.0.0
         with:
           persist-credentials: false
 
-      - name: Check test harness availability
+      - name: Check complete test harness availability
         id: harness
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -f apps/token-site/checks.sh && -f apps/token-site/nav-toggle-test.py && -f apps/token-site/screenshots.sh ]]; then
+          required=(
+            apps/token-site/checks.sh
+            apps/token-site/nav-toggle-test.py
+            apps/token-site/keyboard-test.py
+            apps/token-site/reduced-motion-test.py
+            apps/token-site/a11y-review.py
+            apps/token-site/cdp_helper.py
+            apps/token-site/screenshots.sh
+          )
+          missing=()
+          for path in "${required[@]}"; do
+            [[ -f "$path" ]] || missing+=("$path")
+          done
+          if (( ${#missing[@]} == 0 )); then
             echo "available=true" >> "$GITHUB_OUTPUT"
-            echo "All required token-site test scripts are present."
+            echo "Complete token-site test harness is present."
           elif [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
             echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Post-merge validation is deferred until the PR-013 test harness is merged."
+            echo "::notice::Post-merge validation is deferred; missing harness files: ${missing[*]}"
           else
-            echo "::error::PR validation requires checks.sh, nav-toggle-test.py, and screenshots.sh."
+            echo "::error::PR validation requires the complete test harness. Missing: ${missing[*]}"
             exit 1
           fi
 
@@ -63,6 +78,7 @@ jobs:
       - name: Check required tools
         if: steps.harness.outputs.available == 'true'
         run: |
+          set -euo pipefail
           command -v bash
           command -v curl
           command -v file
@@ -92,6 +108,30 @@ jobs:
             python3 nav-toggle-test.py 2>&1 | tee "evidence/ci-nav-${attempt}.log"
           done
 
+      - name: Keyboard-only interaction matrix (all six pages)
+        if: steps.harness.outputs.available == 'true'
+        working-directory: apps/token-site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 keyboard-test.py 2>&1 | tee evidence/ci-keyboard.log
+
+      - name: Reduced-motion browser emulation
+        if: steps.harness.outputs.available == 'true'
+        working-directory: apps/token-site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 reduced-motion-test.py 2>&1 | tee evidence/ci-reduced-motion.log
+
+      - name: Accessibility review (static + computed contrast)
+        if: steps.harness.outputs.available == 'true'
+        working-directory: apps/token-site
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 a11y-review.py 2>&1 | tee evidence/ci-a11y-review.log
+
       - name: Refresh and validate desktop/mobile screenshots
         if: steps.harness.outputs.available == 'true'
         working-directory: apps/token-site
@@ -107,20 +147,25 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p evidence
-          find evidence -maxdepth 1 -type f \( -name '*.png' -o -name 'ci-*.log' \) -print0 | sort -z | xargs -0 -r sha256sum > CI-SHA256SUMS.txt
-          sha256sum checks.sh screenshots.sh nav-toggle-test.py >> CI-SHA256SUMS.txt
+          find evidence -maxdepth 1 -type f \( -name '*.png' -o -name '*.log' \) -print0 | sort -z | xargs -0 -r sha256sum > CI-SHA256SUMS.txt
+          sha256sum checks.sh screenshots.sh nav-toggle-test.py keyboard-test.py reduced-motion-test.py a11y-review.py cdp_helper.py >> CI-SHA256SUMS.txt
 
-      - name: Upload CI evidence (screenshots, logs, SHA-256)
+      - name: Upload complete CI evidence
         if: always() && steps.harness.outputs.available == 'true'
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # actions/upload-artifact v6.0.0
         with:
           name: token-site-evidence-${{ github.run_id }}
           path: |
             apps/token-site/evidence/*.png
-            apps/token-site/evidence/ci-*.log
+            apps/token-site/evidence/*.log
             apps/token-site/CI-SHA256SUMS.txt
             apps/token-site/checks.sh
             apps/token-site/screenshots.sh
             apps/token-site/nav-toggle-test.py
-          if-no-files-found: warn
+            apps/token-site/keyboard-test.py
+            apps/token-site/reduced-motion-test.py
+            apps/token-site/a11y-review.py
+            apps/token-site/cdp_helper.py
+            docs/accessibility-review-2026-11-09.md
+          if-no-files-found: error
           retention-days: 14
