@@ -116,10 +116,6 @@ chrome = None
 try:
     server = subprocess.Popen([sys.executable, "-m", "http.server", str(HTTP_PORT), "--bind", "127.0.0.1"],
                               cwd=os.getcwd(), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    chrome = subprocess.Popen([CHROME, "--headless=new", "--disable-gpu", "--no-sandbox",
-                               f"--user-data-dir={PROFILE_DIR}",
-                               f"--remote-debugging-port={CDP_PORT}", "--window-size=390,844", URL],
-                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Readiness polling with timeout (15 s) + content check: the server must
     # answer with OUR page, not just any HTTP 200 on a colliding port.
     ready = False
@@ -137,22 +133,41 @@ try:
         print(f"PASS: spawned server pid {server.pid} owns listener on 127.0.0.1:{HTTP_PORT} (CDP port {CDP_PORT})")
     else:
         print(f"INFO: 'ss' unavailable; listener ownership not verified (dynamic free port {HTTP_PORT} + content check still apply)")
+    chrome = subprocess.Popen([CHROME, "--headless=new", "--disable-gpu", "--no-sandbox",
+                               f"--user-data-dir={PROFILE_DIR}",
+                               f"--remote-debugging-port={CDP_PORT}", "--window-size=390,844", URL],
+                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     target = None
     for _ in range(30):
         try:
             tabs = json.load(urllib.request.urlopen(f"http://127.0.0.1:{CDP_PORT}/json/list", timeout=2))
-            target = next(t for t in tabs if t["type"] == "page")
-            break
+            target = next((t for t in tabs if t.get("type") == "page" and t.get("url") == URL), None)
+            if target:
+                break
         except Exception:
             time.sleep(0.5)
-    assert target, "no CDP page target"
+    assert target, f"no CDP page target matching {URL!r}"
     s = ws_connect(target["webSocketDebuggerUrl"])
     cdp(s, 1, "Runtime.enable")
+    page_ready = False
     for _ in range(20):
         r = cdp(s, 9, "Runtime.evaluate", {"expression": "document.readyState", "returnByValue": True})
         if r.get("result", {}).get("value") == "complete":
+            page_ready = True
             break
         time.sleep(0.5)
+    assert page_ready, f"page did not reach readyState=complete at {URL!r}"
+    controls_ready = False
+    for _ in range(20):
+        r = cdp(s, 10, "Runtime.evaluate", {
+            "expression": "!!document.querySelector('[data-nav-toggle]') && !!document.getElementById('site-nav')",
+            "returnByValue": True
+        })
+        if r.get("result", {}).get("value") is True:
+            controls_ready = True
+            break
+        time.sleep(0.25)
+    assert controls_ready, f"nav controls not found at {URL!r}"
     expr = ("(()=>{const t=document.querySelector('[data-nav-toggle]');"
             "const n=document.getElementById('site-nav');"
             "if(!t||!n)return 'FAIL:missing nav controls';"
