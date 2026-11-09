@@ -281,7 +281,7 @@ PR #4 was NOT merged by this work; PR #5 / PR-014 and PR #2 untouched.
 - PR-014 and the founder decisions listed in the original audit (provider,
   privacy, quota, supply, venue) remain open and are untouched by this work.
 
-## Addendum — 2026-11-09, 13:28 WIB (current state; supersedes the repository snapshot above)
+## Addendum — 2026-11-09, 13:31 WIB (current state; supersedes the repository snapshot above)
 
 This addendum records a fresh GitHub API/source inspection. The original 03:20 WIB section above remains a historical snapshot and must not be read as the current repository state.
 
@@ -299,8 +299,8 @@ This addendum records a fresh GitHub API/source inspection. The original 03:20 W
 - Muse commit `fb7945aaac77d8c954415512c1f394570411aaa9` adds the keyboard-only matrix, reduced-motion browser emulation, broader accessibility review, Escape/focus-return behaviour, and removes repository links from the six page footers.
 - Muse documentation follow-ups include `f78ae2b9480c773beb0e64ac2b62152312f84c5c` and `54552f461f9f8094a0fdabec1a8dbaf47e757701`.
 - Owner-side commit `6bea5dc4a0a9d6b56371dccb4ecfa0666d473297` expands CI; `f6cf05735fced84634fd9e8805aeebaea014a836` replaces DOM `.click()` with CDP mouse input and state polling after an intermittent third-run failure; `2941e79de8bd2aad43522b9d9102e08ab5d82891` corrects the test docstring; `e98a8553d5e13e0d4f7372c99aaf5117fb117cc9`, `69557e25b94d86e2d641d341cb83cebdaf925e83`, `4ee3cf8458ede948acd08aec9a3bdeab9ff6ca8d`, and `336e7904bcef4385ff0c38c1d7b6be0263856249` refresh evidence and audit documentation.
-- GitHub Actions run [#42572950950](https://github.com/nusasaputrarama-max/Politik-riuh-project/actions/runs/42572950950) completed SUCCESS on the exact site code/test head `4ee3cf8458ede948acd08aec9a3bdeab9ff6ca8d`; current branch head `336e790` is a later documentation-only sync. All 15 job steps completed successfully: static/route/copy/security/heading checks, three independent mobile navigation runs, keyboard-only matrix across six pages, reduced-motion emulation, accessibility review, 12 desktop/mobile screenshots, checksum generation, and artifact upload.
-- Latest artifact `13654375770`, 2,992,621 bytes, GitHub SHA-256 `807a432ec5242cf8a285af4224398d287b2afec339c54f83735d8d175224b285`. This newest archive was not downloaded independently in this pass. The earlier artifact `13651932929` was independently verified; PR #4 comment `6733642680` records a matching archive digest and 33/33 internal checksum entries.
+- GitHub Actions run [#42573281293](https://github.com/nusasaputrarama-max/Politik-riuh-project/actions/runs/42573281293) completed SUCCESS on the exact current PR head `4de97f66bca47f1c75af88a2dd6264d266d7a135`. All 15 job steps completed successfully: static/route/copy/security/heading checks, three independent mobile navigation runs, keyboard-only matrix across six pages, reduced-motion emulation, accessibility review, 12 desktop/mobile screenshots, checksum generation, and artifact upload.
+- Latest artifact `13654002046`, 2,992,623 bytes, GitHub SHA-256 `3c59f654adbe5210e85f1f4bc85396fd71d9bf8b6a0dfe1d60fbc4af4964ab22`. This newest archive was not downloaded independently in this pass. Earlier artifact `13651932929` was independently verified; PR #4 comment `6733642680` records a matching archive digest and 33/33 internal checksum entries.
 - The accessibility review found 360 visible text elements with none below the configured contrast thresholds, but approximates text over the decorative hero glow. No screen-reader test or physical-device keyboard test was performed. This is not a WCAG conformance claim.
 - One direct public repository URL remains in `apps/token-site/transparency.html:82`. Footer links were removed, but this body link exposes the personal GitHub handle. Its retention/removal and any move to an organization require the founder's decision; no substitute URL has been invented.
 
