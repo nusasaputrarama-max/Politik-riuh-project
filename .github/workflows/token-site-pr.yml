@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - "apps/token-site/**"
+      - ".github/workflows/token-site-pr.yml"
   push:
     branches:
       - main
     paths:
       - "apps/token-site/**"
+      - ".github/workflows/token-site-pr.yml"
 
 permissions:
   contents: read
