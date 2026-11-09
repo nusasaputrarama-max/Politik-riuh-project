@@ -131,3 +131,66 @@ Separate token decisions still open:
 ## Boundaries
 
 No mainnet deployment, token minting, sale, presale, airdrop, wallet signing, fund movement, public whitelist registration, or production website deployment is authorized by this audit.
+
+
+---
+
+## Audit delta — 2026-11-09, 11:20 WIB
+
+This section supersedes the repository snapshot and CI status above where they conflict. The original 03:20 WIB findings remain historical.
+
+### Current repository state
+
+- `main`: `4707a74b2871c707646943b22405742271ab3d9e`.
+- PR #4 / PR-013: open, not merged, current head before this audit-note update `630934fd733dcd73c685d7f9efec18c8690632d9`; GitHub reports mergeable, but acceptance is still blocked.
+- PR #5 / PR-014: open, not merged, head `e4d997a00ddf2da8cec64fe60225abed92681526`; GitHub currently reports `mergeable=false`, 12 commits ahead and 10 behind main. Keep it design-only and do not merge ahead of PR-013.
+- Root README and `docs/backlog.md` were updated on main and PR-013 to matching content. The README now explicitly says newsroom monitoring, source verification and a public transparency dashboard are not implemented.
+- Main branch API reports `protected: false`; repository rulesets endpoint returns `[]`. No required review or status-check enforcement is configured.
+- GitHub's classic branch-protection detail endpoint returned 403 to this integration, but the branch object itself reports `protected: false`.
+
+### Current PR-013 implementation and CI
+
+Independent source inspection of all six HTML pages at the current PR-013 branch confirms:
+
+- 6/6 pages declare `lang="id"` and each has exactly one H1.
+- No form, fetch/XHR, browser storage, wallet-status UI, wallet signing or transaction code was found.
+- The public GitHub repository URL appears in all six pages (two occurrences on Transparency), exposing the owner handle through the site.
+- `main.js` toggles the mobile menu through a click listener. The current CDP test invokes a click through `Runtime.evaluate`; it is not a keyboard-only test.
+- `styles.css` includes `prefers-reduced-motion: reduce`, but actual browser/OS reduced-motion behaviour has not yet been exercised.
+
+CI evidence:
+
+- Full site-validation run `42556069910` passed on `7ae3174b72980cf1829a7c7ab3d73d72173fcb0f`: 8/8 route checks, 6/6 HTML/copy/security/heading checks, three click-based navigation runs, 12 screenshot captures, checksum generation and artifact upload.
+- Owner-side documentation refresh triggered run `42561450697` on `630934fd733dcd73c685d7f9efec18c8690632d9`; GitHub reports the run and every job step as SUCCESS.
+- Latest artifact for run `42561450697`: `13649587549`, 2,981,115 bytes, GitHub digest `sha256:064f0aea8287feb0582a6809fb2886af43656e4a8e320bd0494b8080c7c1b6b7`. This latest archive has not been independently downloaded/re-hashed.
+- Prior artifact `13647213466` was independently verified in PR comment `6732082342`: downloaded archive digest matched GitHub and `sha256sum -c CI-SHA256SUMS.txt` passed 20/20 entries.
+- Five contrast pairs remain a spot-check, not a full WCAG audit.
+
+### Remaining PR-013 acceptance blockers
+
+1. Add actual keyboard-only coverage across all six pages: Tab order, skip link, visible focus, Enter/Space activation, navigation links, Escape/close behaviour and focus return.
+2. Test reduced motion using browser media emulation or an actual OS/browser preference.
+3. Complete a broader accessibility review; do not claim WCAG conformance from five contrast pairs.
+4. Rama must decide whether to retain the public repository footer link, which exposes the owner handle, or remove it. Removing the site link does not anonymize the public GitHub repository itself. Do not invent a replacement URL or organization.
+5. Reconcile PR-013 with current main and rerun the relevant checks after source/workflow changes.
+
+### Current PR-014 security posture
+
+The ADR remains design-only. Its revised boundaries are useful but are not implemented or tested:
+
+- Applicant requests must use caller JWT/RLS; service-role bypasses RLS and is limited to narrowly scoped server-side operations.
+- Every privileged Supabase operation must enforce AAL2 server-side; tests must prove AAL1 is denied and AAL2 allowed.
+- Applicant A must not read applicant B's records; all queries must be scoped to authenticated applicant identity.
+- Audit hashes are tamper-evident, not immutable against database-owner compromise; restricted append privileges and external signed chain-head anchors are required.
+- Telegram and Discord verification remain MANUAL until consent-based identity binding is designed and security-tested.
+- Provider, region, backup/PITR, retention, restore, pricing and email decisions remain open. No provider is selected.
+
+### Muse handoff / attribution
+
+No new Muse implementation commit is visible after the previously recorded site/test-hardening work. The latest PR-013 and PR-014 changes in this audit cycle are owner-side documentation updates. Do not attribute these documentation commits or CI-maintenance commits to Muse.
+
+Next Muse work is the keyboard-only and reduced-motion evidence on PR-013, followed by a deliberate branch update. PR-014 must be reconciled only after PR-013 acceptance and must preserve the security corrections above.
+
+### Safety boundary
+
+No Pages deployment, public preview, backend, live registration, applicant data collection, wallet connection/signing, token mint/distribution, mainnet action or funds movement was performed or authorized.
