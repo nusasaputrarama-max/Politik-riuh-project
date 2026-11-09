@@ -1,0 +1,68 @@
+name: token-site non-deploy checks
+
+on:
+  pull_request:
+    paths:
+      - "apps/token-site/**"
+      - ".github/workflows/token-site-pr.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/token-site/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: token-site-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Static, browser and screenshot validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # actions/checkout v4
+
+      - name: Install Chrome
+        id: chrome
+        uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # v1.7.3
+        with:
+          chrome-version: stable
+          install-dependencies: true
+
+      - name: Export Chrome path
+        run: |
+          echo "CHROME=${{ steps.chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
+          echo "CHROME_VERSION=${{ steps.chrome.outputs.chrome-version }}" >> "$GITHUB_ENV"
+
+      - name: Check required tools
+        run: |
+          command -v bash
+          command -v curl
+          command -v file
+          command -v node
+          command -v python3
+          command -v ss
+          echo "Chrome: $CHROME_VERSION"
+
+      - name: Static, route, copy, security-pattern and contrast checks
+        working-directory: apps/token-site
+        run: bash checks.sh
+
+      - name: Mobile navigation test (three independent runs)
+        working-directory: apps/token-site
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            echo "NAV-TOGGLE RUN ${attempt}/3"
+            python3 nav-toggle-test.py
+          done
+
+      - name: Refresh and validate desktop/mobile screenshots
+        working-directory: apps/token-site
+        run: bash screenshots.sh
