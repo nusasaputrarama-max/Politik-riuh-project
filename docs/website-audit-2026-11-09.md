@@ -264,9 +264,12 @@ PR #4 was NOT merged by this work; PR #5 / PR-014 and PR #2 untouched.
   3/3, `keyboard-test.py` exit 0, `reduced-motion-test.py` exit 0,
   `a11y-review.py` exit 0, `screenshots.sh` 12/12; evidence refreshed
   (screenshots + `SHA256SUMS.txt` + logs).
-- CI workflow (`.github/workflows/token-site-pr.yml`) extended with the
-  three new test steps; harness-availability guard, checksum list and
-  artifact upload updated to include the new scripts and logs.
+- CI workflow update (`.github/workflows/token-site-pr.yml`: three new test
+  steps; harness-availability guard, checksum list and artifact upload
+  updated) is committed locally as `9acd7c4` but NOT pushed: the gh token
+  lacks the `workflow` scope and GitHub rejects the push. Until it lands
+  (owner account, or `gh auth refresh -s workflow`), CI on this PR runs the
+  previous workflow — the new tests are proven locally only.
 
 ### What still blocks acceptance, in Muse's view
 
