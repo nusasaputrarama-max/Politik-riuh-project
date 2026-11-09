@@ -160,30 +160,86 @@ try:
     controls_ready = False
     for _ in range(20):
         r = cdp(s, 10, "Runtime.evaluate", {
-            "expression": "!!document.querySelector('[data-nav-toggle]') && !!document.getElementById('site-nav')",
+            "expression": "document.documentElement.classList.contains('js') && !!document.querySelector('[data-nav-toggle]') && !!document.getElementById('site-nav')",
             "returnByValue": True
         })
         if r.get("result", {}).get("value") is True:
             controls_ready = True
             break
         time.sleep(0.25)
-    assert controls_ready, f"nav controls not found at {URL!r}"
-    expr = ("(()=>{const t=document.querySelector('[data-nav-toggle]');"
-            "const n=document.getElementById('site-nav');"
-            "if(!t||!n)return 'FAIL:missing nav controls';"
-            "const initial=t.getAttribute('aria-expanded')==='false'&&t.getAttribute('aria-controls')==='site-nav'&&t.textContent==='Menu';"
-            "t.click();"
-            "const opened=n.classList.contains('is-open')&&t.getAttribute('aria-expanded')==='true'&&t.textContent==='Tutup menu';"
-            "t.click();"
-            "const closed=!n.classList.contains('is-open')&&t.getAttribute('aria-expanded')==='false'&&t.textContent==='Menu';"
-            "return 'INITIAL='+initial+' OPEN='+opened+' CLOSED='+closed;})()")
-    r = cdp(s, 2, "Runtime.evaluate", {"expression": expr, "returnByValue": True})
-    if "exceptionDetails" in r:
-        print("FAIL: evaluate exception:", json.dumps(r["exceptionDetails"])[:500]); sys.exit(1)
-    out = r["result"]["value"]
-    print(out)
-    ok = out == "INITIAL=true OPEN=true CLOSED=true"
-    print("PASS: nav toggle initial/open/close states and ARIA labels are correct" if ok else "FAIL: unexpected toggle state")
+    assert controls_ready, f"nav controls or main.js not ready at {URL!r}"
+
+    # Use actual CDP mouse input rather than HTMLElement.click(). Poll after
+    # each click so a delayed event/listener cannot produce a timing false-fail.
+    state_expr = ("(()=>{const t=document.querySelector('[data-nav-toggle]');"
+                  "const n=document.getElementById('site-nav');"
+                  "const r=t?t.getBoundingClientRect():null;"
+                  "const cs=t?getComputedStyle(t):null;"
+                  "return JSON.stringify({"
+                  "ready:document.documentElement.classList.contains('js'),"
+                  "initial:!!t&&t.getAttribute('aria-expanded')==='false'&&t.getAttribute('aria-controls')==='site-nav'&&t.textContent==='Menu',"
+                  "open:!!n&&n.classList.contains('is-open'),"
+                  "expanded:t?t.getAttribute('aria-expanded'):null,"
+                  "label:t?t.textContent:null,"
+                  "visible:!!r&&!!cs&&cs.display!=='none'&&cs.visibility!=='hidden'&&r.width>0&&r.height>0,"
+                  "disabled:!!t&&t.disabled,"
+                  "x:r?r.x+r.width/2:0,y:r?r.y+r.height/2:0"
+                  "});})()")
+
+    def read_state(mid):
+        result = cdp(s, mid, "Runtime.evaluate", {
+            "expression": state_expr, "returnByValue": True
+        })
+        if "exceptionDetails" in result:
+            raise RuntimeError(json.dumps(result["exceptionDetails"])[:500])
+        return json.loads(result["result"]["value"])
+
+    def click_toggle(mid):
+        before = read_state(mid)
+        assert before["ready"] and before["visible"] and not before["disabled"], (
+            f"toggle is not ready/visible/enabled: {before}")
+        x, y = before["x"], before["y"]
+        cdp(s, mid + 1, "Input.dispatchMouseEvent", {
+            "type": "mouseMoved", "x": x, "y": y
+        })
+        cdp(s, mid + 2, "Input.dispatchMouseEvent", {
+            "type": "mousePressed", "x": x, "y": y,
+            "button": "left", "clickCount": 1
+        })
+        cdp(s, mid + 3, "Input.dispatchMouseEvent", {
+            "type": "mouseReleased", "x": x, "y": y,
+            "button": "left", "clickCount": 1
+        })
+        after = before
+        for attempt in range(20):
+            after = read_state(mid + 4 + attempt)
+            if after["open"] != before["open"]:
+                break
+            time.sleep(0.05)
+        return before, after
+
+    initial = read_state(11)
+    initial_ok = (initial["ready"] and initial["initial"] and
+                  initial["visible"] and not initial["disabled"] and
+                  initial["open"] is False and initial["expanded"] == "false" and
+                  initial["label"] == "Menu")
+    before_open, opened = click_toggle(20)
+    open_ok = (opened["open"] is True and opened["expanded"] == "true" and
+               opened["label"] == "Tutup menu")
+    before_close, closed = click_toggle(50)
+    close_ok = (closed["open"] is False and closed["expanded"] == "false" and
+                closed["label"] == "Menu")
+    print("INITIAL=" + str(initial_ok) + " OPEN=" + str(open_ok) +
+          " CLOSED=" + str(close_ok))
+    if not initial_ok:
+        print("INITIAL STATE:", json.dumps(initial))
+    if not open_ok:
+        print("OPEN TRANSITION:", json.dumps(before_open), "=>", json.dumps(opened))
+    if not close_ok:
+        print("CLOSE TRANSITION:", json.dumps(before_close), "=>", json.dumps(closed))
+    ok = initial_ok and open_ok and close_ok
+    print("PASS: nav toggle initial/open/close states and ARIA labels are correct" if ok
+          else "FAIL: unexpected toggle state")
     sys.exit(0 if ok else 1)
 finally:
     for proc in (chrome, server):
