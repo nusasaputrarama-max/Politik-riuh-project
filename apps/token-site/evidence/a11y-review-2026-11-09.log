@@ -1,0 +1,16 @@
+Accessibility review — token site (static + browser contrast sweep)
+PASS: index.html static — lang=id, h1=1, headings=13, landmarks=['footer', 'header', 'main', 'nav'], images=0, links=19, buttons=1, aria-labelledby refs=4
+PASS: about.html static — lang=id, h1=1, headings=12, landmarks=['footer', 'header', 'main', 'nav'], images=0, links=16, buttons=1, aria-labelledby refs=3
+PASS: token.html static — lang=id, h1=1, headings=5, landmarks=['footer', 'header', 'main', 'nav'], images=0, links=16, buttons=1, aria-labelledby refs=1
+PASS: launch.html static — lang=id, h1=1, headings=13, landmarks=['footer', 'header', 'main', 'nav'], images=0, links=16, buttons=1, aria-labelledby refs=4
+PASS: transparency.html static — lang=id, h1=1, headings=5, landmarks=['footer', 'header', 'main', 'nav'], images=0, links=17, buttons=1, aria-labelledby refs=1
+PASS: roadmap.html static — lang=id, h1=1, headings=18, landmarks=['footer', 'header', 'main', 'nav'], images=0, links=15, buttons=1, aria-labelledby refs=0
+PASS: stylesheet — :focus-visible rule present=True, reduced-motion block present=True, total <img> elements=0
+PASS: index.html contrast sweep — 64 text elements, 0 below threshold, worst 5.06:1 (<span> 'budaya meme.')
+PASS: about.html contrast sweep — 47 text elements, 0 below threshold, worst 5.23:1 (<a> 'Baca gambaran token')
+PASS: token.html contrast sweep — 47 text elements, 0 below threshold, worst 5.23:1 (<a> 'Cara peluncuran bekerja')
+PASS: launch.html contrast sweep — 63 text elements, 0 below threshold, worst 5.23:1 (<a> 'Gambaran token')
+PASS: transparency.html contrast sweep — 47 text elements, 0 below threshold, worst 5.23:1 (<a> 'Lihat peta jalan')
+PASS: roadmap.html contrast sweep — 92 text elements, 0 below threshold, worst 6.69:1 (<span> 'Status —')
+PASS: review document written to docs/accessibility-review-2026-11-09.md
+ACCESSIBILITY REVIEW PASSED — no hard defects; open gaps are documented in the review

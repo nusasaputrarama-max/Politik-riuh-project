@@ -1,0 +1,90 @@
+Keyboard-only test — token site, all six pages
+PASS: index.html tab sweep reaches 19 focusable stops — tabbed 19 stops, DOM lists 19
+PASS: index.html first Tab stop is the skip link — a :: Lewati ke konten -> #main
+PASS: index.html header nav links in DOM order (stops 3-7) — Tentang > Token > Peluncuran > Transparansi > Peta Jalan
+PASS: index.html tab set == DOM focusable set — missing=[] extra=[]
+PASS: index.html visible focus (2px solid red outline) on every stop
+PASS: index.html skip link becomes visible on focus — top=12px
+PASS: index.html skip-link Enter moves focus to <main> — active=main#main :: Politik Riuh — Situs peluncuran token Po hash=#main
+PASS: about.html tab sweep reaches 16 focusable stops — tabbed 16 stops, DOM lists 16
+PASS: about.html first Tab stop is the skip link — a :: Lewati ke konten -> #main
+PASS: about.html header nav links in DOM order (stops 3-7) — Tentang > Token > Peluncuran > Transparansi > Peta Jalan
+PASS: about.html tab set == DOM focusable set — missing=[] extra=[]
+PASS: about.html visible focus (2px solid red outline) on every stop
+PASS: about.html skip link becomes visible on focus — top=12px
+PASS: about.html skip-link Enter moves focus to <main> — active=main#main :: Tentang Politik independen, dibaca lanta hash=#main
+PASS: token.html tab sweep reaches 16 focusable stops — tabbed 16 stops, DOM lists 16
+PASS: token.html first Tab stop is the skip link — a :: Lewati ke konten -> #main
+PASS: token.html header nav links in DOM order (stops 3-7) — Tentang > Token > Peluncuran > Transparansi > Peta Jalan
+PASS: token.html tab set == DOM focusable set — missing=[] extra=[]
+PASS: token.html visible focus (2px solid red outline) on every stop
+PASS: token.html skip link becomes visible on focus — top=12px
+PASS: token.html skip-link Enter moves focus to <main> — active=main#main :: Token Satu token meme Solana Artefak kom hash=#main
+PASS: launch.html tab sweep reaches 16 focusable stops — tabbed 16 stops, DOM lists 16
+PASS: launch.html first Tab stop is the skip link — a :: Lewati ke konten -> #main
+PASS: launch.html header nav links in DOM order (stops 3-7) — Tentang > Token > Peluncuran > Transparansi > Peta Jalan
+PASS: launch.html tab set == DOM focusable set — missing=[] extra=[]
+PASS: launch.html visible focus (2px solid red outline) on every stop
+PASS: launch.html skip link becomes visible on focus — top=12px
+PASS: launch.html skip-link Enter moves focus to <main> — active=main#main :: Peluncuran Belum diluncurkan Belum ada t hash=#main
+PASS: transparency.html tab sweep reaches 17 focusable stops — tabbed 17 stops, DOM lists 17
+PASS: transparency.html first Tab stop is the skip link — a :: Lewati ke konten -> #main
+PASS: transparency.html header nav links in DOM order (stops 3-7) — Tentang > Token > Peluncuran > Transparansi > Peta Jalan
+PASS: transparency.html tab set == DOM focusable set — missing=[] extra=[]
+PASS: transparency.html visible focus (2px solid red outline) on every stop
+PASS: transparency.html skip link becomes visible on focus — top=12px
+PASS: transparency.html skip-link Enter moves focus to <main> — active=main#main :: Transparansi Apa yang ada — dan apa yang hash=#main
+PASS: roadmap.html tab sweep reaches 15 focusable stops — tabbed 15 stops, DOM lists 15
+PASS: roadmap.html first Tab stop is the skip link — a :: Lewati ke konten -> #main
+PASS: roadmap.html header nav links in DOM order (stops 3-7) — Tentang > Token > Peluncuran > Transparansi > Peta Jalan
+PASS: roadmap.html tab set == DOM focusable set — missing=[] extra=[]
+PASS: roadmap.html visible focus (2px solid red outline) on every stop
+PASS: roadmap.html skip link becomes visible on focus — top=12px
+PASS: roadmap.html skip-link Enter moves focus to <main> — active=main#main :: Peta Jalan Milestone, disertai bukti Set hash=#main
+PASS: index Tab x3 lands on nav link Tentang — a :: Tentang -> about.html
+PASS: index Shift+Tab moves focus back to the wordmark — a :: POLITIK RIUH -> index.html
+PASS: index focus is on Tentang before Enter — a :: Tentang -> about.html
+PASS: index Enter on nav link Tentang navigates to about.html — http://127.0.0.1:38769/about.html
+PASS: index.html nav toggle is visible at mobile width — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': False}
+PASS: index.html Tab reaches the nav toggle — button :: Menu
+PASS: index.html Space opens the menu — {'visible': True, 'open': True, 'expanded': 'true', 'label': 'Tutup menu', 'focused': True}
+PASS: index.html Tab from open toggle reaches first nav link — a :: Tentang -> about.html
+PASS: index.html Escape closes the menu AND returns focus to toggle — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': True}
+PASS: index.html Enter opens the menu — {'visible': True, 'open': True, 'expanded': 'true', 'label': 'Tutup menu', 'focused': True}
+PASS: index.html Enter closes the menu again — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': True}
+PASS: about.html nav toggle is visible at mobile width — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': False}
+PASS: about.html Tab reaches the nav toggle — button :: Menu
+PASS: about.html Space opens the menu — {'visible': True, 'open': True, 'expanded': 'true', 'label': 'Tutup menu', 'focused': True}
+PASS: about.html Tab from open toggle reaches first nav link — a :: Tentang -> about.html
+PASS: about.html Escape closes the menu AND returns focus to toggle — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': True}
+PASS: about.html Enter opens the menu — {'visible': True, 'open': True, 'expanded': 'true', 'label': 'Tutup menu', 'focused': True}
+PASS: about.html Enter closes the menu again — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': True}
+PASS: token.html nav toggle is visible at mobile width — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': False}
+PASS: token.html Tab reaches the nav toggle — button :: Menu
+PASS: token.html Space opens the menu — {'visible': True, 'open': True, 'expanded': 'true', 'label': 'Tutup menu', 'focused': True}
+PASS: token.html Tab from open toggle reaches first nav link — a :: Tentang -> about.html
+PASS: token.html Escape closes the menu AND returns focus to toggle — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': True}
+PASS: token.html Enter opens the menu — {'visible': True, 'open': True, 'expanded': 'true', 'label': 'Tutup menu', 'focused': True}
+PASS: token.html Enter closes the menu again — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': True}
+PASS: launch.html nav toggle is visible at mobile width — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': False}
+PASS: launch.html Tab reaches the nav toggle — button :: Menu
+PASS: launch.html Space opens the menu — {'visible': True, 'open': True, 'expanded': 'true', 'label': 'Tutup menu', 'focused': True}
+PASS: launch.html Tab from open toggle reaches first nav link — a :: Tentang -> about.html
+PASS: launch.html Escape closes the menu AND returns focus to toggle — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': True}
+PASS: launch.html Enter opens the menu — {'visible': True, 'open': True, 'expanded': 'true', 'label': 'Tutup menu', 'focused': True}
+PASS: launch.html Enter closes the menu again — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': True}
+PASS: transparency.html nav toggle is visible at mobile width — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': False}
+PASS: transparency.html Tab reaches the nav toggle — button :: Menu
+PASS: transparency.html Space opens the menu — {'visible': True, 'open': True, 'expanded': 'true', 'label': 'Tutup menu', 'focused': True}
+PASS: transparency.html Tab from open toggle reaches first nav link — a :: Tentang -> about.html
+PASS: transparency.html Escape closes the menu AND returns focus to toggle — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': True}
+PASS: transparency.html Enter opens the menu — {'visible': True, 'open': True, 'expanded': 'true', 'label': 'Tutup menu', 'focused': True}
+PASS: transparency.html Enter closes the menu again — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': True}
+PASS: roadmap.html nav toggle is visible at mobile width — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': False}
+PASS: roadmap.html Tab reaches the nav toggle — button :: Menu
+PASS: roadmap.html Space opens the menu — {'visible': True, 'open': True, 'expanded': 'true', 'label': 'Tutup menu', 'focused': True}
+PASS: roadmap.html Tab from open toggle reaches first nav link — a :: Tentang -> about.html
+PASS: roadmap.html Escape closes the menu AND returns focus to toggle — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': True}
+PASS: roadmap.html Enter opens the menu — {'visible': True, 'open': True, 'expanded': 'true', 'label': 'Tutup menu', 'focused': True}
+PASS: roadmap.html Enter closes the menu again — {'visible': True, 'open': False, 'expanded': 'false', 'label': 'Menu', 'focused': True}
+KEYBOARD TEST PASSED (all pages, desktop + mobile)

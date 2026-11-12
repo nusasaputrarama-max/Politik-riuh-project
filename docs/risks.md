@@ -14,6 +14,10 @@
 | R-S04 | Admin/editorial account takeover | Medium | Editorial workspace (Phase 2) becomes a target: publish false "verified" claims. | Phase 1 has no auth surface (repo-driven). Phase 2 auth must be reviewed by ChatGPT before build. | OPEN (deferred to P2 by design) |
 | R-S05 | Dependency supply chain | Medium | A compromised dependency could exfiltrate data or inject content. | Minimal dependencies, lockfiles, no install scripts from untrusted sources. | OPEN |
 | R-S06 | Scraping / scraping-abuse of our own site | Low | Bots scrape the dashboard or spam the meme queue. | Rate limits and manual curation in Phase 2; no user accounts in Phase 1. | OPEN |
+| R-S07 | Whitelist applicant data exposure | High | Email, wallet address, X handle, and evidence become linkable applicant data if stored or exposed together. | Protected backend/database, TLS, encryption at rest, least privilege, no applicant data in GitHub/static assets/logs, privacy notice/consent, retention and deletion workflow. | OPEN — whitelist not implemented |
+| R-S08 | Admin account takeover | High | A compromised admin account could alter tasks, quota, evidence decisions, or applicant outcomes. | Server-side RBAC, MFA, short-lived sessions, rate limits, audit trail, and recovery procedure. | OPEN — architecture pending |
+| R-S09 | False task verification | High | Self-attested likes/follows/reposts may be presented as independently verified without reliable API evidence. | Per-task verification mode; API capability matrix; otherwise manual review or self-attestation; only VERIFIED unlocks dependencies. | OPEN — whitelist not implemented |
+| R-S10 | Whitelist abuse / duplicate applications | Medium | Bots, duplicate emails/wallets, or coordinated submissions may distort eligibility and review. | Server-side validation, rate limits, email verification, duplicate detection, evidence review, auditable admin flags. | OPEN — whitelist not implemented |
 
 ## 2. Editorial risks
 

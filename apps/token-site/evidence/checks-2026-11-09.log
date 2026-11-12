@@ -1,0 +1,16 @@
+INFO: allocated free port 49177
+PASS: spawned server pid 4029 owns listener on 127.0.0.1:49177
+PASS: route smoke test 8/8 HTTP 200 with expected page content
+PASS: HTML parse 6/6 — lang=id, one <h1>, landmarks, no duplicate ids, links resolve
+PASS: copy discipline — no stale candidate names, no leftover English participant copy, REFORMASI identity present
+PASS: footer — no public repository link in any page footer
+PASS: negative regressions — no .wallet-status, no founder name, no 0,02 SOL estimate, no present-tense newsroom/editorial claims, Gate 01 narrowed to token name
+PASS: no forms, fetch/XHR/storage, wallet signing, or secret patterns in site source
+PASS: node --check main.js
+  contrast muted #9a9aa0 on bg #0a0a0b: 7.07:1
+  contrast headline #fafafa on bg #0a0a0b: 18.96:1
+  contrast red accent #e5484d on bg #0a0a0b: 5.06:1
+  contrast white on primary button #c93338: 5.23:1
+  contrast white on primary button hover #be2e33: 5.79:1
+PASS: contrast: five-pair palette spot-check passes WCAG AA; not a full page audit
+ALL CHECKS PASSED
