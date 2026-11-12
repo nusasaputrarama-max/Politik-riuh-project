@@ -1,7 +1,7 @@
 # POLITIK RIUH — Token Design (v0.1, DESIGN ONLY)
 
 - **Date:** 2026-11-09
-- **Status:** DESIGN ONLY. No production token, mainnet mint, distribution, or contract deployment is authorized. Any devnet-only test mint is a separate non-production test and requires explicit approval before execution.
+- **Status:** DESIGN ONLY. No production token, mainnet mint, distribution, or contract deployment is authorized. Any devnet-only test mint is a separate non-production test and requires Rama's separate written approval before execution.
 - **Rules in force:** no Mainnet, no real tokens, no presale, no paid launch services.
 
 ## 1. Purpose
@@ -15,7 +15,7 @@ One Solana-based meme token for the POLITIK RIUH community. The token is a commu
 | pump.fun | No platform fee; network fee + account-creation deposit (see §2.1) | Yes — bonding curve; reported graduation threshold is not verified from a primary source (see §2.1) | 0.30% of bonding-curve trades to creator (verified snapshot; re-check before any decision) | Low: platform-defined supply/metadata; fee page uses 1B in market-cap calculation, while decimals still need primary-program verification | Venue remains unselected; graduation rates are window-dependent and not decision-grade without a defined sample/window |
 | Own SPL mint | Network fees, account rent, and metadata costs; no budget estimate approved | No — needs a liquidity pool, which needs capital | None automatic | Full: supply, decimals, metadata, authorities | Costs must be measured from current primary requirements and a separately approved devnet test |
 
-Preliminary Muse preference: **pump.fun** for the first token, but this is not an owner decision. It must not be treated as a recommendation until the remaining unverified items in §2.1 are resolved and the venue is compared against the project's budget and risk constraints.
+No venue preference is a decision: **pump.fun** and own SPL mint remain open options (D-04), and the public site states the venue as **Belum diputuskan**. A venue may only be selected after the remaining unverified items in §2.1 are resolved and the venue is compared against the project's budget and risk constraints.
 
 ### 2.1 Venue-claim verification (checked 2026-11-09, PR-013)
 
@@ -40,6 +40,7 @@ Primary source: **pump.fun fee page, https://pump.fun/docs/fees — "Last Update
 
 - Token name: **REFORMASI** (approved by Rama in GitHub issue #1).
 - Proposed symbol/ticker: **REFORMASI**, subject to technical compatibility checks before publication.
+- Public copy rule (PR-013 gate item 3): the public site displays the ticker as **Belum diputuskan** until the compatibility check passes; the proposed symbol is recorded here only as a proposal, not as a decided public value.
 - Brand relationship: **POLITIK RIUH presents REFORMASI**. The token website is not the separate POLITIK RIUH news portal.
 - Character: hybrid Indonesian political satire, internet/meme culture, and community identity; long-term priority is community-first.
 - Team identity: anonymous. Compensate with operational transparency and verifiable disclosures; do not invent biographies, audits, partnerships, or safety claims.
@@ -48,7 +49,7 @@ Primary source: **pump.fun fee page, https://pump.fun/docs/fees — "Last Update
 ## 4. Supply & distribution (draft — to be fixed in PR-009)
 
 - Supply: **UNDECIDED**. Earlier drafts contain both 1,000,000,000 (1B) and 10,000,000,000 (10B) proposals. Neither is approved. Do not display a numeric supply or implement final tokenomics until Rama resolves the conflict.
-- No presale. No team allocation at launch on pump.fun (venue gives the creator no allocation except voluntary first buys).
+- No presale. No team allocation at launch, on whichever venue is selected (on pump.fun the venue gives the creator no allocation except voluntary first buys).
 - Creator first buy: optional, small, disclosed on the dashboard if it happens.
 - No mint authority retained after launch (venue-controlled on pump.fun; explicit revoke step if own SPL mint).
 
@@ -57,7 +58,7 @@ Primary source: **pump.fun fee page, https://pump.fun/docs/fees — "Last Update
 1. Concept approved by Rama (D-05).
 2. Fresh Solana wallet (Phantom/Solflare) — never the drained wallet.
 3. Devnet SOL from faucet (free), only after Rama explicitly approves the separate devnet test plan.
-4. Only after separate written approval for a devnet test: create a test-only SPL mint on Solana devnet (CLI/Metaplex) or review the selected venue flow conceptually. A devnet test is not a production token and does not authorize mainnet activity.
+4. Only after Rama's separate written approval for a devnet test: create a test-only SPL mint on Solana devnet (CLI/Metaplex) or review the selected venue flow conceptually. A devnet test is not a production token and does not authorize mainnet activity.
 5. Record: mint address, transaction signatures, holder state — in this repo under `token/devnet/`.
 6. No value, no trading, no distribution on devnet.
 

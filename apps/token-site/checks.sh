@@ -168,6 +168,41 @@ for pat in (r"memantau\s+berita", r"pemantauan\s+berita", r"memverifikasi\s+sumb
 # Gate 01 must be narrowed to the approved token NAME only.
 if "Konsep disetujui" in all_text or "Keputusan konsep token" in all_text:
     fails.append("Gate 01 still claims the whole token concept is approved (only the name is)")
+# Gate item 3 — public ticker and venue values must read "Belum diputuskan".
+# The token NAME (REFORMASI) stays approved; only the ticker VALUE is undecided.
+token_text = Path("token.html").read_text(encoding="utf-8")
+if not re.search(r'<th scope="row">Simbol \(ticker\)</th>\s*<td>\s*Belum diputuskan', token_text):
+    fails.append("token.html: ticker value is not 'Belum diputuskan' (Simbol (ticker) row)")
+if re.search(r'<th scope="row">Simbol \(ticker\)</th>\s*<td>\s*REFORMASI', token_text):
+    fails.append("token.html: ticker value presents REFORMASI as decided")
+if not re.search(r'<th scope="row">Venue peluncuran</th>\s*<td>\s*Belum diputuskan', token_text):
+    fails.append("token.html: venue value is not 'Belum diputuskan' (Venue peluncuran row)")
+if re.search(r'<th scope="row">Venue peluncuran</th>\s*<td>\s*pump\.fun', token_text):
+    fails.append("token.html: venue value presents pump.fun as decided")
+index_text = Path("index.html").read_text(encoding="utf-8")
+if "Simbol (ticker) belum diputuskan" not in index_text:
+    fails.append("index.html: ticker note does not state 'Simbol (ticker) belum diputuskan'")
+# The venue sub-note in token.html states devnet-first in lowercase mid-sentence.
+if "hanya setelah persetujuan tertulis terpisah dari founder" not in token_text.lower():
+    fails.append("token.html: venue sub-note lacks the devnet approval condition")
+# Gate item 3 — every devnet-mint statement must carry the approval condition.
+for p, expected in (("launch.html", 2), ("roadmap.html", 1)):
+    t = Path(p).read_text(encoding="utf-8")
+    n = t.count("Hanya setelah persetujuan tertulis terpisah dari founder")
+    if n < expected:
+        fails.append(f"{p}: devnet mint text lacks the required approval condition (found {n}, expected at least {expected})")
+for old in ("Token dibuat di devnet Solana dengan dompet baru dan SOL faucet",
+            "Di devnet: dompet Solana baru, SOL devnet gratis dari faucet",
+            "Token dibuat di devnet Solana dengan bukti tercatat"):
+    if old in all_text:
+        fails.append(f"unconditional devnet-mint sentence still present: {old!r}")
+# Gate item 4 — stale wallet-scope language must not appear in public copy.
+for pat in (r"read-only connect", r"wallet-adapter", r"wallet adapter",
+            r"connect/disconnect", r"Koneksi baca-saja",
+            r"koneksi dompet ditunda", r"koneksi dompet direncanakan"):
+    if re.search(pat, all_text, re.IGNORECASE):
+        fails.append(f"stale wallet-scope language present in public copy: {pat}")
+
 # No wallet/signing/transaction code anywhere in the site tree
 site = "\n".join(p.read_text(encoding="utf-8", errors="ignore") for p in Path(".").rglob("*") if p.is_file() and p.suffix in (".html", ".js", ".css") and "evidence" not in p.parts)
 for pat in (r"signTransaction", r"signMessage", r"sendTransaction", r"connect\(\)", r"window\.solana", r"@solana/", r"api_key", r"sk-[A-Za-z0-9]{20,}"):
@@ -181,7 +216,7 @@ if fails:
 print("PASS: HTML parse 6/6 — lang=id, one <h1>, landmarks, no duplicate ids, links resolve")
 print("PASS: copy discipline — no stale candidate names, no leftover English participant copy, REFORMASI identity present")
 print("PASS: anonymous identity — no owner GitHub handle or direct repository URL in any public page")
-print("PASS: negative regressions — no .wallet-status, no founder name, no 0,02 SOL estimate, no present-tense newsroom/editorial claims, Gate 01 narrowed to token name")
+print("PASS: negative regressions — no .wallet-status, no founder name, no 0,02 SOL estimate, no present-tense newsroom/editorial claims, Gate 01 narrowed to token name; ticker and venue values are 'Belum diputuskan'; devnet mint text carries the separate-written-approval condition; no stale wallet-scope language")
 print("PASS: no forms, fetch/XHR/storage, wallet signing, or secret patterns in site source")
 PYEOF
 [ $? -ne 0 ] && FAIL=1

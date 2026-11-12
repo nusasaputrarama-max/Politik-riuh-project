@@ -2,7 +2,7 @@
 
 HTML/CSS/JS statis murni. **Tanpa dependensi**: tanpa package manager, tanpa build step, tanpa webfont, tanpa permintaan eksternal saat runtime. Hanya system font stack.
 
-**Identitas:** POLITIK RIUH mempersembahkan **REFORMASI** — nama token REFORMASI sudah disetujui founder (issue #1, 2026-11-09); simbol yang diusulkan REFORMASI menunggu pemeriksaan kompatibilitas teknis. Seluruh salinan peserta berbahasa Indonesia (`lang="id"`).
+**Identitas:** POLITIK RIUH mempersembahkan **REFORMASI** — nama token REFORMASI sudah disetujui founder (issue #1, 2026-11-09); simbol (ticker) ditampilkan sebagai **Belum diputuskan** di salinan publik — simbol yang diusulkan REFORMASI menunggu pemeriksaan kompatibilitas teknis. Seluruh salinan peserta berbahasa Indonesia (`lang="id"`).
 
 ## File
 
@@ -58,8 +58,8 @@ python3 a11y-review.py      # exit 0 = review aksesibilitas tanpa defect keras
 | Route smoke test (`curl`, server lokal) | **8/8 HTTP 200 + konten yang diharapkan per route**: `index/about/token/launch/transparency/roadmap.html`, `styles.css`, `main.js` — server memakai port dinamis yang dialokasikan bebas, readiness polling 15 detik, dan PID server terverifikasi memiliki listener (bukan port tetap 8000) |
 | HTML parse (python `html.parser`) | **6/6 halaman, tanpa error**; `lang="id"`; tepat satu `<h1>`; urutan heading tidak melompat level; landmark `header/nav/main/footer`; tanpa ID duplikat |
 | Tautan internal | Semua target `href`/`src` resolve di disk (diperiksa per halaman) |
-| Disiplin salinan | Tanpa nama kandidat lama (NENGOK/GORENG/DER); tanpa sisa salinan Inggris yang menghadap peserta; identitas REFORMASI ada; status "Belum diluncurkan" ada; `launch.html` menyatakan whitelist belum dibuka |
-| Regresi negatif (PR-013) | **Tidak ada**: tanpa elemen `.wallet-status` / frasa "Koneksi baca-saja direncanakan", tanpa nama personal founder di salinan publik, tanpa estimasi "0,02 SOL", tanpa klaim newsroom present-tense, Gate 01 hanya "Nama token disetujui" |
+| Disiplin salinan | Tanpa nama kandidat lama (NENGOK/GORENG/DER); tanpa sisa salinan Inggris yang menghadap peserta; identitas REFORMASI ada (nama); simbol (ticker) dan venue ditampilkan "Belum diputuskan"; status "Belum diluncurkan" ada; `launch.html` menyatakan whitelist belum dibuka |
+| Regresi negatif (PR-013) | **Tidak ada**: tanpa elemen `.wallet-status` / frasa "Koneksi baca-saja direncanakan", tanpa nama personal founder di salinan publik, tanpa estimasi "0,02 SOL", tanpa klaim newsroom present-tense, Gate 01 hanya "Nama token disetujui"; **baru (gate item 3–4)**: nilai ticker dan venue harus "Belum diputuskan", setiap referensi mint devnet harus memuat frasa persetujuan tertulis terpisah dari founder, tanpa bahasa wallet-scope basi ("koneksi dompet ditunda/direncanakan", "read-only connect", "wallet-adapter") |
 | Form / fetch / storage / dompet | **Tidak ada**: tanpa `<form>`, `fetch()`/XHR, `localStorage`, kode wallet/signing, atau pola secret di source situs |
 | Sintaks JS | `node --check main.js` — lolos |
 | Kontras (spot-check lima pasangan palet) | Teks redup di bg **7,07:1**; headline **18,96:1**; aksen merah di bg **5,06:1**; tombol utama putih di `#C93338` **5,23:1**; hover **5,79:1** — lima pasangan yang diuji lolos AA untuk teks normal (4,5:1); ini bukan audit semua kombinasi warna halaman |
@@ -81,26 +81,26 @@ python3 a11y-review.py      # exit 0 = review aksesibilitas tanpa defect keras
 ### Bug yang ditemukan screenshot dan diperbaiki (Fase 1)
 
 1. **Hero terdorong ke bawah ~480px (desktop + mobile).** Penyebab: `.hero > * { position: relative; }` mengalahkan `position: absolute` milik `.glow`, sehingga glow memakan ruang flow. Diperbaiki menjadi `.hero > .wrap`.
-2. **Pill status dompet meluber dari viewport di mobile.** Penyebab: `white-space: nowrap` pada pill 44 karakter. Diperbaiki: membungkus ke dua baris di bawah 720px.
+2. **Pill status dompet meluber dari viewport di mobile.** Penyebab: `white-space: nowrap` pada pill 44 karakter. Diperbaiki saat itu dengan membungkus ke dua baris di bawah 720px; elemen status dompet kemudian **dihapus seluruhnya di PR-013** — tidak ada lagi elemen status dompet di situs (lihat "Keterbatasan yang diketahui" di bawah).
 3. **Kontras tombol utama gagal AA (3,75:1).** Putih di `#E5484D` di bawah 4,5:1 untuk teks normal. Diperbaiki: latar tombol digelapkan ke `#C93338` (5,23:1); hover `#BE2E33` (5,79:1).
 
 ## Disiplin fakta (mengikat)
 
 - **Suplai ditampilkan sebagai "Diusulkan — menunggu persetujuan founder" TANPA angka.** Dua usulan yang bertentangan masih ada: `docs/token-design.md` merancang 1.000.000.000 sementara `docs/website-launch-spec.md` §10 mencatat 10.000.000.000 sebagai usulan. Konflik itu (D-05a) adalah keputusan founder yang masih terbuka; situs tidak menyelesaikannya.
-- **Nama token REFORMASI sudah disetujui founder; simbol yang diusulkan REFORMASI** menunggu pemeriksaan kompatibilitas teknis — situs tidak menyatakan simbol itu kompatibel. Tidak ada alamat kontrak/mint, tanggal peluncuran, jumlah holder, volume, harga, atau metrik reward di mana pun di situs — semuanya belum ada.
+- **Nama token REFORMASI sudah disetujui founder; simbol (ticker) ditampilkan sebagai "Belum diputuskan" di salinan publik** — simbol yang diusulkan REFORMASI menunggu pemeriksaan kompatibilitas teknis; situs tidak menyatakan simbol itu kompatibel. Tidak ada alamat kontrak/mint, tanggal peluncuran, jumlah holder, volume, harga, atau metrik reward di mana pun di situs — semuanya belum ada.
 - Status peluncuran adalah "Belum diluncurkan" / "Mainnet belum diluncurkan", tanpa hitung mundur. Gate mainnet 01 (nama token REFORMASI disetujui) ditandai Selesai; parameter token lainnya tetap belum diputuskan dan gate 02–05 masih Menunggu.
 - **Whitelist adalah alur pendaftaran dan peninjauan GRATIS, bukan penjualan whitelist atau alokasi yang dijamin — dan pendaftaran belum dibuka.** Belum ada backend, basis data, atau deployment yang disetujui; situs statis ini tidak mengumpulkan data pendaftar.
 - Tanpa counter palsu, waitlist, CTA mati, atau tautan placeholder yang disajikan sebagai fungsional.
 
 ## Target deployment (diusulkan, belum dikonfigurasi)
 
-**GitHub Pages (diusulkan)** — keputusan D-01 masih terbuka (technical and founder decisions). Catatan feasibility lengkap ada di `docs/DEPLOYMENT_FEASIBILITY_TOKEN_SITE_2026-11-09.md`: artifact source harus tepat `apps/token-site/` (bukan root repo), opsi workflow GitHub Actions vs branch, domain kustom, HTTPS, implikasi env/keamanan, dan rollback. Situs berada di subdirektori (`apps/token-site/`), jadi Pages membutuhkan workflow yang memublikasikan direktori itu (atau branch khusus). **Belum ada yang di-deploy; tidak ada setting repo yang diubah.**
+**GitHub Pages (diusulkan)** — keputusan D-01 masih terbuka (technical and founder decisions). Catatan feasibility lengkap ada di `docs/DEPLOYMENT_FEASIBILITY_TOKEN_SITE_2026-11-09.md`: artifact source harus tepat `apps/token-site/` (bukan root repo), opsi workflow GitHub Actions vs branch, domain kustom, HTTPS, implikasi env/keamanan, dan rollback. Situs berada di subdirektori (`apps/token-site/`), jadi Pages membutuhkan workflow yang memublikasikan direktori itu (atau branch khusus). **Belum ada yang di-deploy; tidak ada setting repo yang diubah.** Publikasi GitHub Pages, DNS, dan HTTPS publik: **NOT VERIFIED / NOT AUTHORIZED**.
 
 ## Keterbatasan yang diketahui
 
-- **Tanpa koneksi dompet.** Ditunda sesuai `docs/frontend-stack-decision.md` §2 (opsional di spec; menambah package wallet-adapter akan memperkenalkan dependensi untuk fitur opsional). Tidak ada elemen status dompet di header atau di halaman mana pun (dihapus PR-013; `checks.sh` menegaskan ketidakhadirannya).
+- **Tanpa koneksi dompet.** Integrasi dompet BUKAN bagian dari Fase 1 (lihat `docs/website-launch-spec.md` §5): tidak ada status dompet, koneksi baca-saja, package wallet-adapter, kontrol connect/disconnect, signing, atau kode transaksi. Integrasi dompet di masa depan memerlukan keputusan scope terpisah yang disetujui founder — bukan fitur opsional yang tinggal diaktifkan. Tidak ada elemen status dompet di header atau di halaman mana pun (dihapus PR-013; `checks.sh` menegaskan ketidakhadirannya).
 - **Tanpa backend, tanpa form, tanpa analitik.** Kanal kontak / pelaporan belum dikonfigurasi (dinyatakan sebagai teks biasa di footer).
-- **Fakta token yang masih menunggu keputusan founder:** pemeriksaan kompatibilitas simbol, suplai (konflik 1B vs 10B), desimal, alokasi, venue (D-04), tanggal peluncuran, domain resmi, dan tautan sosial terverifikasi.
+- **Fakta token yang masih menunggu keputusan founder:** pemeriksaan kompatibilitas simbol (ticker), suplai (konflik 1B vs 10B), desimal, alokasi, venue (D-04), tanggal peluncuran, domain resmi, dan tautan sosial terverifikasi.
 - **Whitelist belum diimplementasikan.** Situs saat ini tanpa form, backend, basis data, dasbor applicant, atau panel admin. Jangan kumpulkan data applicant nyata sampai arsitektur di `docs/whitelist-spec.md` disetujui.
 - **Dukungan reduced-motion terbukti lewat emulasi media browser** (`reduced-motion-test.py`, 2026-11-09): `prefers-reduced-motion: reduce` mengubah `scroll-behavior` menjadi `auto` dan transisi menjadi `none` di Chrome headless, lalu berbalik saat emulasi dilepas.
 - **Keyboard-only terverifikasi** (`keyboard-test.py`, 2026-11-09): urutan Tab, skip link, Enter/Space, Escape + focus return, dan fokus terlihat — semua enam halaman, desktop + mobile, input keyboard nyata via CDP.

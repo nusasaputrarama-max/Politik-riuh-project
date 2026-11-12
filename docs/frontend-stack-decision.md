@@ -19,7 +19,7 @@
 - Pages (multi-page static, shared stylesheet, plain links): `index.html` (/), `about.html`, `token.html`, `launch.html`, `transparency.html`, `roadmap.html`.
 - No build step. Scripts in `package.json` (if added) are checks only: local serve, route smoke test, link check — not a build.
 - No webfonts in Phase 1 (system font stacks only) — zero external fetches at runtime.
-- **Wallet connect: NOT in the Phase 1 build.** The spec makes it optional ("may implement"). Adding wallet-adapter packages would introduce npm dependencies and supply-chain review for an optional feature. Deferred to a post–Phase 1 decision; the header shows wallet status as "Not connected — read-only connect planned" with no dead button (no button at all until it works).
+- **Wallet connect: NOT in the Phase 1 build.** The spec makes it optional ("may implement"), but no wallet integration is in the Phase 1 scope: no wallet status, no read-only connection, no wallet-adapter package, no connect/disconnect control, no signing, and no transaction code (see `docs/website-launch-spec.md` §5). Adding wallet-adapter packages would introduce npm dependencies and supply-chain review. Any future wallet integration requires a separate founder-approved scope decision; it is not a deferred feature that can be switched on. The header shows no wallet status at all (the wallet-status element was removed in PR-013).
 
 ## 3. Rationale
 

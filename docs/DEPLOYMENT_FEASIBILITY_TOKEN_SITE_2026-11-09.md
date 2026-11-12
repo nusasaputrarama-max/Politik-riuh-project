@@ -3,6 +3,7 @@
 - **Date:** 2026-11-09
 - **Scope:** `apps/token-site/` only
 - **Status:** FEASIBLE AS A STATIC PREVIEW / NOT AUTHORIZED TO DEPLOY
+- **Pages publication, DNS, and public HTTPS:** NOT VERIFIED / NOT AUTHORIZED
 - **Repository:** `nusasaputrarama-max/Politik-riuh-project`
 - **Branch for this proposal:** `audit/whitelist-and-token-site-review-2026-11-09`
 - **Explicit exclusion:** `apps/web/` (the separate news portal) is not part of this deployment.
@@ -131,7 +132,7 @@ The current static site is suitable for public preview only after factual and la
 - Task-verification capability boundaries (verified vs self-attested vs manual review).
 - Rate limits, duplicate/abuse controls, and audit trail.
 - Data minimization, retention schedule, deletion process, backup/restore, and breach response.
-- No wallet connection or signing requirement for the Phase 1 registration form.
+- No wallet connection or signing requirement for the whitelist registration flow (applicants type a public Solana address as text; that is not wallet connection).
 
 ## 6. Pre-deployment acceptance gates
 
@@ -139,8 +140,8 @@ Do not deploy until all gates pass:
 
 | Gate | Required evidence |
 |---|---|
-| Owner content approval | Approved Indonesian copy, POLITIK RIUH presents REFORMASI identity, risk disclosures |
-| Facts discipline | Token remains marked not launched; no invented supply, mint, venue, date, holders, volume, treasury, partnership, or return claims |
+| Owner content approval | Approved Indonesian copy (ticker and venue shown as "Belum diputuskan"; devnet mint conditional on separate written founder approval), POLITIK RIUH presents REFORMASI identity, risk disclosures |
+| Facts discipline | Token remains marked not launched; ticker and venue shown as "Belum diputuskan"; no invented supply, mint, date, holders, volume, treasury, partnership, or return claims |
 | Language/accessibility | All six pages use `lang="id"`; natural Indonesian copy; keyboard/focus, contrast, reduced motion, semantic landmarks |
 | Route integrity | All six routes and all internal CSS/JS links pass local smoke tests under the project path prefix |
 | Scope isolation | Workflow artifact contains only `apps/token-site/`; no `apps/web/` files |

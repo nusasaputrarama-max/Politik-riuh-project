@@ -1,6 +1,7 @@
 # POLITIK RIUH — Token Launch Website Specification
 
 > **Current scope decisions (supersede conflicting v0.1 text below):** the project presents REFORMASI; token name is REFORMASI and proposed symbol/ticker is REFORMASI pending technical compatibility checks. Phase 1 is a static informational site only: **no wallet connection control, wallet status, wallet-adapter integration, registration form, or backend**. No signing or transactions. The approved whitelist requirements and sequential task flow are specified in `docs/whitelist-spec.md`, but are not implemented. Supply remains unresolved; do not publish a number.
+> **Public copy rule (PR-013 gate item 3, 2026-11-12):** the public site displays the ticker (symbol) and the launch venue as **Belum diputuskan**. The token NAME remains REFORMASI (approved, issue #1); the proposed symbol REFORMASI is recorded only as pending the technical compatibility check. Every devnet mint reference in public copy is explicitly conditional on Rama's separate written approval.
 
 Version: 0.1
 Date: 2026-11-09
