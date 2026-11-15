@@ -1,4 +1,8 @@
 # POLITIK RIUH — Token Launch Website Specification
+
+> **Current scope decisions (supersede conflicting v0.1 text below):** the project presents REFORMASI; token name is REFORMASI and proposed symbol/ticker is REFORMASI pending technical compatibility checks. Phase 1 is a static informational site only: **no wallet connection control, wallet status, wallet-adapter integration, registration form, or backend**. No signing or transactions. The approved whitelist requirements and sequential task flow are specified in `docs/whitelist-spec.md`, but are not implemented. Supply remains unresolved; do not publish a number.
+> **Public copy rule (PR-013 gate item 3, 2026-11-12):** the public site displays the ticker (symbol) and the launch venue as **Belum diputuskan**. The token NAME remains REFORMASI (approved, issue #1); the proposed symbol REFORMASI is recorded only as pending the technical compatibility check. Every devnet mint reference in public copy is explicitly conditional on Rama's separate written approval.
+
 Version: 0.1
 Date: 2026-11-09
 Status: Approved direction for Phase 1 implementation planning; not production-ready.
@@ -29,10 +33,10 @@ Phase 1 public routes:
 - /launch — launch status and process. Before launch, show "Not launched" / "Coming later"; do not display a fake countdown or fabricated launch date.
 - /transparency — allocation, treasury and wallet disclosures, liquidity/lock information, and transaction/explorer links only when evidence exists. Clearly label unavailable or not-yet-finalized data.
 - /roadmap — milestones with status labels (planned, in progress, completed) backed by repository evidence.
-- wallet connection control — optional read-only connection capability; no signing, approvals, transfers, swaps, or token purchase in Phase 1.
+- wallet integration — **out of scope in Phase 1**; no connect/disconnect control, wallet status, or wallet-adapter code.
 
 ## 4. Homepage content hierarchy
-1. Header: POLITIK RIUH wordmark, links (About, Token, Launch, Transparency, Roadmap), wallet status/control.
+1. Header: POLITIK RIUH wordmark and links (About, Token, Launch, Transparency, Roadmap); no wallet status/control.
 2. Hero: "Politics meets meme culture." Supporting copy: independent political meme ecosystem; no profit promise.
 3. Status strip: network/environment and launch status. Use explicit labels such as "Devnet planning" and "Mainnet not launched".
 4. Metrics: show only verified values. Static token supply may be displayed as "proposed" until founder approves final token parameters. Never invent holder counts, volume, market cap, rewards, waitlist counts, or price.
@@ -40,15 +44,10 @@ Phase 1 public routes:
 6. Transparency preview: link to verified allocation and treasury disclosures; if not finalized, say so plainly.
 7. Footer: official links, disclaimer, contact/report channel placeholder only if configured.
 
-## 5. Wallet connection and security boundary
-Phase 1 may implement wallet-adapter connection for Solana as read-only identity/session state. Requirements:
-- Clearly show connected public address and disconnect control.
-- Never request or collect seed phrases or private keys.
-- No wallet signing or transaction construction in Phase 1.
-- No automatic connection; user initiates it.
-- No wallet address stored server-side by default. If persistence/analytics is later proposed, document purpose, consent, retention, and deletion.
-- Do not imply that connecting a wallet registers for rewards or guarantees allocation.
-- Use official, maintained Solana wallet-adapter packages; pin dependencies and review supply-chain/security risks.
+## 5. Wallet integration deferred and security boundary
+Wallet integration is **not part of Phase 1**. The static site must not include a wallet-adapter package, connect/disconnect control, connected-address display, wallet-status indicator, signing request, transaction construction, or transaction submission. Do not add read-only connection as an incidental convenience; it changes the privacy and trust boundary and requires a separate founder-approved scope decision.
+
+A future whitelist may ask an applicant to type a public Solana address as text after the backend, privacy notice, consent, retention, and deletion controls are approved. That is not wallet connection and does not authorize a signature. Never request or collect seed phrases, private keys, wallet passwords, or transaction approvals. Any future wallet integration requires a separate threat model, privacy review, dependency review, and explicit founder approval.
 
 ## 6. Technical implementation proposal
 Muse must inspect the current repository and existing architecture before selecting or adding frameworks. Do not introduce a second stack without documenting why.
@@ -74,7 +73,7 @@ No invasive tracking by default. If analytics are proposed, document provider, e
 - All routes load and navigate correctly on mobile and desktop.
 - Visual system follows the approved direction and is recognizably POLITIK RIUH, not a clone.
 - All displayed figures and status labels have a documented source or are explicitly marked proposed/unavailable.
-- Wallet connect/disconnect works in read-only mode on supported Solana wallets; no signing or transactions are possible.
+- No wallet-adapter dependency, connect/disconnect control, wallet status, signing, or transaction code is present in the Phase 1 static site.
 - No dead CTAs, fabricated counters, fake countdowns, or unverified contract addresses.
 - Accessibility basics: semantic structure, keyboard navigation, visible focus, contrast, reduced motion.
 - Security review finds no committed secrets, private-key handling, unsafe wallet signing, or unnecessary personal-data collection.
@@ -83,7 +82,7 @@ No invasive tracking by default. If analytics are proposed, document provider, e
 
 ## 10. Explicit decisions still required
 Do not silently finalize these:
-- Token name and ticker.
+- ~~Token name and ticker.~~ — **DECIDED 2026-11-09 (issue #1, owner comments):** token name REFORMASI; proposed symbol/ticker REFORMASI, subject to technical compatibility checks before publication. (PR-013.)
 - Final supply, decimals, allocations, vesting, treasury and liquidity policy.
 - Launch date, launch venue and launch mechanism.
 - Official domain and verified social links.
@@ -91,5 +90,5 @@ Do not silently finalize these:
 The previously discussed supply of 10,000,000,000 is a proposal only until founder approval.
 
 ## 11. Phase boundaries
-Phase 1: implement and test the informational launch website; optional read-only wallet connection.
+Phase 1: implement and test the static informational launch website only; no wallet connection or registration.
 Later phases require separate founder approval and review before enabling transaction signing, minting, token sale, liquidity, airdrops, or mainnet deployment.

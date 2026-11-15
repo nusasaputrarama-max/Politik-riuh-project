@@ -1,0 +1,9 @@
+Reduced-motion test — token site (CDP media emulation)
+PASS: control (no-preference): reduce does not match — {'matchesReduce': False, 'scrollBehavior': 'smooth', 'skipTransitionDuration': '0.15s', 'skipTransitionProperty': 'top'}
+PASS: control: html scroll-behavior is smooth — {'matchesReduce': False, 'scrollBehavior': 'smooth', 'skipTransitionDuration': '0.15s', 'skipTransitionProperty': 'top'}
+PASS: control: skip-link transition is 0.15s — {'matchesReduce': False, 'scrollBehavior': 'smooth', 'skipTransitionDuration': '0.15s', 'skipTransitionProperty': 'top'}
+PASS: emulated reduce: media query matches — {'matchesReduce': True, 'scrollBehavior': 'auto', 'skipTransitionDuration': '0s', 'skipTransitionProperty': 'none'}
+PASS: emulated reduce: html scroll-behavior becomes auto — {'matchesReduce': True, 'scrollBehavior': 'auto', 'skipTransitionDuration': '0s', 'skipTransitionProperty': 'none'}
+PASS: emulated reduce: skip-link transition becomes 0s (none) — {'matchesReduce': True, 'scrollBehavior': 'auto', 'skipTransitionDuration': '0s', 'skipTransitionProperty': 'none'}
+PASS: restored no-preference: behaviour flips back — {'matchesReduce': False, 'scrollBehavior': 'smooth', 'skipTransitionDuration': '0.15s', 'skipTransitionProperty': 'top'}
+REDUCED-MOTION TEST PASSED

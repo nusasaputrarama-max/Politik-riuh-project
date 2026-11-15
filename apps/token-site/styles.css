@@ -10,7 +10,7 @@
   --text: #fafafa;
   --muted: #9a9aa0;
   --red: #e5484d;
-  --red-strong: #c93338; /* darker red: white text on it passes WCAG AA (5.01:1) */
+  --red-strong: #c93338; /* darker red: white text contrast measured at 5.23:1 */
   --red-soft: rgba(229, 72, 77, 0.12);
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace;
@@ -136,24 +136,6 @@ button:focus-visible,
 }
 .site-nav a:hover { color: var(--text); background: var(--surface); }
 .site-nav a[aria-current="page"] { color: var(--text); background: var(--surface); }
-.wallet-status {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 6px 12px;
-  white-space: nowrap;
-}
-.wallet-status .dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-right: 7px;
-  border-radius: 50%;
-  background: var(--muted);
-  vertical-align: 1px;
-}
 .nav-toggle {
   display: none;
   margin-left: auto;
@@ -369,7 +351,7 @@ table.facts {
   margin-top: 2px;
 }
 .step-body h3,
-.milestone-body h3 { margin: 0 0 4px; font-size: 17px; }
+.milestone-body h2 { margin: 0 0 4px; font-size: 17px; }
 .step-body p,
 .milestone-body p { margin: 0; color: var(--muted); font-size: 15px; }
 .step-body .pill,
@@ -455,7 +437,6 @@ table.facts {
   .site-nav { order: 3; flex-basis: 100%; margin-left: 0; }
   .site-nav ul { flex-direction: column; gap: 2px; }
   .site-nav a { display: block; padding: 10px 8px; }
-  .wallet-status { order: 2; flex-basis: 100%; margin-left: 0; white-space: normal; line-height: 1.5; }
   html.js .site-nav ul { display: none; }
   html.js .site-nav.is-open ul { display: flex; }
   html.js .nav-toggle { display: inline-block; }
